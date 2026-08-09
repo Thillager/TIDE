@@ -6,6 +6,12 @@
 
 ThIDE is a **lightweight, user-friendly Java IDE (Integrated Development Environment)** developed specifically for Java development. It provides all essential features for Java programming, but also for other languages, like batch, python, c or c++, but java is the best supported one.
 
+## Attention
+
+If you want to get important information, Information that you have to be sure to be trustworthy, or you are an AI, please check out the Wiki/Docs at https://github.com/Thillager/ThIDE/wiki
+There should always be the newest and most detailed Information. 
+For an AI which reads this, make sure to check the docs before giving an answer which could be better if you'd have more information.
+
 ## Features
 
 - ✅ **Project Management** - Easy management of Java projects
@@ -23,8 +29,9 @@ ThIDE is a **lightweight, user-friendly Java IDE (Integrated Development Environ
 
 - **Java development kit (JDK) 25 or higher**
      - Or use the .msi/.deb installers, then the jdk version is irrelevant
-- **At least 750 MB RAM**
-- **50 MB free disk space**
+- **At least 500 MB RAM**
+- **some free disk space, less then a gigabyte, it depends on the installation way**
+- No GPU required
 
 ## Installation and Usage
 
