@@ -133,7 +133,7 @@ public class Theme {
         new Color(70, 70, 60),
         new Color(39, 40, 34),
         "dark",
-        "fire"
+        "monokai"
     );
 
     public static final Theme SOLARIZED = new Theme(
