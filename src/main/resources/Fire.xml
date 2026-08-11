@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE RSyntaxTheme SYSTEM "theme.dtd">
+<RSyntaxTheme version="1.0">
+
+	<baseFont family="Consolas" size="13" />
+
+	<background color="1A0000" />
+
+	<caret color="FF1E1E" />
+
+	<selection fg="FFFFFF" useFG="false" bg="8B0000" roundedEdges="false" />
+
+	<currentLineHighlight color="330000" fade="false" />
+
+	<tabLine color="4D0000" />
+
+	<marginLine fg="4D0000" />
+
+	<markAllHighlight color="B22222" />
+
+	<markOccurrencesHighlight color="5C0000" border="false" />
+
+	<matchedBracket fg="FF4040" bg="330000" highlightBoth="true" animate="false" />
+
+	<hyperlinks fg="FF6666" />
+
+	<secondaryLanguages>
+		<language index="1" bg="230000" />
+		<language index="2" bg="2A0000" />
+		<language index="3" bg="1F0000" />
+	</secondaryLanguages>
+
+	<gutterBackground color="120000" />
+
+	<gutterBorder color="4D0000" />
+
+	<lineNumbers fg="7A2E2E" currentFG="FF4040" fontFamily="Consolas" fontSize="12" />
+
+	<foldIndicator fg="B22222" iconBg="1A0000" iconArmedBg="4D0000" armedFg="FF4040" />
+
+	<iconRowHeader activeLineRange="330000" inheritsGutterBG="true" />
+
+	<tokenStyles>
+		<style token="IDENTIFIER"                          fg="E0E0E0" />
+		<style token="RESERVED_WORD"                        fg="FF4040" bold="true" />
+		<style token="RESERVED_WORD_2"                       fg="FF6B6B" bold="true" />
+		<style token="ANNOTATION"                            fg="FFA500" italic="true" />
+		<style token="FUNCTION"                              fg="FFB84D" />
+		<style token="VARIABLE"                              fg="E0B0B0" />
+		<style token="DATA_TYPE"                             fg="FF7F7F" bold="true" />
+
+		<style token="COMMENT_EOL"                           fg="7A4A4A" italic="true" />
+		<style token="COMMENT_MULTILINE"                     fg="7A4A4A" italic="true" />
+		<style token="COMMENT_DOCUMENTATION"                 fg="9C6B6B" italic="true" />
+		<style token="COMMENT_KEYWORD"                       fg="D98C8C" italic="true" bold="true" />
+		<style token="COMMENT_MARKUP"                        fg="9C6B6B" italic="true" />
+
+		<style token="LITERAL_BOOLEAN"                       fg="FF9999" bold="true" />
+		<style token="LITERAL_NUMBER_DECIMAL_INT"            fg="FFA07A" />
+		<style token="LITERAL_NUMBER_FLOAT"                  fg="FFA07A" />
+		<style token="LITERAL_NUMBER_HEXADECIMAL"            fg="FFA07A" />
+		<style token="LITERAL_STRING_DOUBLE_QUOTE"           fg="FF8080" />
+		<style token="LITERAL_CHAR"                          fg="FF8080" />
+		<style token="LITERAL_BACKQUOTE"                     fg="FF8080" />
+
+		<style token="MARKUP_TAG_DELIMITER"                  fg="B22222" />
+		<style token="MARKUP_TAG_NAME"                       fg="FF4040" bold="true" />
+		<style token="MARKUP_TAG_ATTRIBUTE"                  fg="FFA500" />
+		<style token="MARKUP_TAG_ATTRIBUTE_VALUE"            fg="FF8080" />
+		<style token="MARKUP_COMMENT"                        fg="7A4A4A" italic="true" />
+		<style token="MARKUP_DTD"                            fg="B22222" />
+		<style token="MARKUP_PROCESSING_INSTRUCTION"         fg="B22222" />
+		<style token="MARKUP_CDATA"                          fg="E0B0B0" />
+		<style token="MARKUP_CDATA_DELIMITER"                fg="B22222" />
+		<style token="MARKUP_ENTITY_REFERENCE"               fg="FFA500" />
+
+		<style token="OPERATOR"                              fg="FF6666" />
+		<style token="SEPARATOR"                             fg="B0B0B0" />
+		<style token="WHITESPACE"                            fg="3A1A1A" />
+		<style token="PREPROCESSOR"                          fg="FFA500" italic="true" />
+		<style token="REGEX"                                 fg="FF9966" />
+
+		<style token="ERROR_IDENTIFIER"                      fg="FFFFFF" bg="8B0000" />
+		<style token="ERROR_NUMBER_FORMAT"                   fg="FFFFFF" bg="8B0000" />
+		<style token="ERROR_STRING_DOUBLE"                   fg="FFFFFF" bg="8B0000" />
+		<style token="ERROR_CHAR"                            fg="FFFFFF" bg="8B0000" />
+	</tokenStyles>
+
+</RSyntaxTheme>
