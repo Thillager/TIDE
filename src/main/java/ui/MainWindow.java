@@ -14,6 +14,7 @@ import ui.SettingsDialog;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatPropertiesLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 
@@ -166,12 +167,14 @@ public class MainWindow extends JFrame {
 			// Zuerst dem System sagen, dass FlatLaf die Fensterdekorationen übernehmen soll
 			JFrame.setDefaultLookAndFeelDecorated(true);
 
-			switch (theme.flatLafClass) {
-				case "dark"      -> UIManager.setLookAndFeel(new FlatDarkLaf());
-				case "light"     -> UIManager.setLookAndFeel(new FlatLightLaf());
-				case "mac-dark"  -> UIManager.setLookAndFeel(new FlatMacDarkLaf());
-				case "mac-light" -> UIManager.setLookAndFeel(new FlatMacLightLaf());
-				default          -> UIManager.setLookAndFeel(new FlatDarkLaf());
+			if (!loadCustomFlatLaf(theme)) {
+				switch (theme.flatLafClass) {
+					case "dark"      -> UIManager.setLookAndFeel(new FlatDarkLaf());
+					case "light"     -> UIManager.setLookAndFeel(new FlatLightLaf());
+					case "mac-dark"  -> UIManager.setLookAndFeel(new FlatMacDarkLaf());
+					case "mac-light" -> UIManager.setLookAndFeel(new FlatMacLightLaf());
+					default          -> UIManager.setLookAndFeel(new FlatDarkLaf());
+				}
 			}
 
 			// ── NEU: Titelleisten-Styling (Anhand deines aktuellen Themes) ──
@@ -215,6 +218,52 @@ public class MainWindow extends JFrame {
 		} catch (Exception ex) {
 			System.err.println("[ThIDE] FlatLaf-Theme konnte nicht geladen werden: " + ex.getMessage());
 		}
+	}
+
+	// ── Custom FlatLaf-Theme laden (.properties) ────────────────────────────
+	// Priorität 1: Vom Nutzer in den Einstellungen hinterlegter, freier Pfad
+	//              zu einer eigenen .properties-Datei (z.B. FlatLaf Theme Editor).
+	// Priorität 2: Vom Theme selbst mitgebrachte Ressource unter
+	//              src/main/resources/<flatLafPropertiesResource>
+	//              (z.B. "Fire" → resources/themes/Fire.properties).
+	// Gibt true zurück, wenn ein Custom-Theme erfolgreich gesetzt wurde –
+	// in diesem Fall wird das eingebaute FlatLaf-LnF-Mapping übersprungen.
+	private static boolean loadCustomFlatLaf(Theme theme) {
+		// 1. Nutzerdefinierter Pfad aus den Einstellungen (überstimmt alles andere)
+		String customPath = TIDEPreferences.getFlatLafThemePath();
+		if (customPath != null && !customPath.isBlank()) {
+			File flatLafFile = new File(customPath);
+			if (flatLafFile.exists()) {
+				try {
+					UIManager.setLookAndFeel(new FlatPropertiesLaf(theme.name, flatLafFile));
+					return true;
+				} catch (Exception ex) {
+					System.err.println("[ThIDE] Custom FlatLaf-Theme-Datei konnte nicht geladen werden: "
+							+ ex.getMessage());
+				}
+			} else {
+				System.err.println("[ThIDE] Custom FlatLaf-Theme-Datei nicht gefunden: " + customPath);
+			}
+		}
+
+		// 2. Vom Theme mitgebrachtes .properties-Theme (z.B. Fire.properties)
+		if (theme.flatLafPropertiesResource != null && !theme.flatLafPropertiesResource.isBlank()) {
+			try (java.io.InputStream is = MainWindow.class.getClassLoader()
+					.getResourceAsStream(theme.flatLafPropertiesResource)) {
+				if (is != null) {
+					UIManager.setLookAndFeel(new FlatPropertiesLaf(theme.name, is));
+					return true;
+				} else {
+					System.err.println("[ThIDE] FlatLaf-Theme-Ressource nicht gefunden: "
+							+ theme.flatLafPropertiesResource);
+				}
+			} catch (Exception ex) {
+				System.err.println("[ThIDE] FlatLaf-Theme-Ressource konnte nicht geladen werden: "
+						+ ex.getMessage());
+			}
+		}
+
+		return false;
 	}
 
 	private void initSubsystems() {
