@@ -181,6 +181,19 @@ public class EditorManager {
                 ? themeSetting
                 : themeSetting + ".xml";
 
+        // Eigene, mitgelieferte Theme-XML im resources-Ordner (Klassenpfad-Wurzel),
+        // z.B. src/main/resources/fire.xml für das Fire-Theme (Dateiname wird
+        // klein geschrieben gesucht, damit "Fire" → "fire.xml" passt).
+        String resourcesRootFile = "/" + xmlName.toLowerCase(Locale.ROOT);
+        try (InputStream is = EditorManager.class.getResourceAsStream(resourcesRootFile)) {
+            if (is != null) {
+                return org.fife.ui.rsyntaxtextarea.Theme.load(is);
+            }
+        } catch (Exception e) {
+            consolePanel.log("[Theme] Theme-XML im resources-Ordner konnte nicht geladen werden: "
+                    + e.getMessage() + "\n", Color.ORANGE);
+        }
+
         String ownResource = "/org/fife/ui/rsyntaxtextarea/themes/" + xmlName;
         try (InputStream is = EditorManager.class.getResourceAsStream(ownResource)) {
             if (is != null) {
