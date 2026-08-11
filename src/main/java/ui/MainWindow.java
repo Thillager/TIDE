@@ -179,41 +179,46 @@ public class MainWindow extends JFrame {
 
 			// ── NEU: Titelleisten-Styling (Anhand deines aktuellen Themes) ──
 			// Nutzt ein passendes Grau/Hintergrundfarbe deines aktiven Themes
-			UIManager.put("TitlePane.background",              theme.backgroundLight);
-			UIManager.put("TitlePane.inactiveBackground",      theme.background);
-			UIManager.put("TitlePane.foreground",              theme.foreground);
-			UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
+			if (theme.backgroundLight != null) UIManager.put("TitlePane.background",              theme.backgroundLight);
+			if (theme.background != null) UIManager.put("TitlePane.inactiveBackground",      theme.background);
+			if (theme.foreground != null) UIManager.put("TitlePane.foreground",              theme.foreground);
+			if (theme.foregroundDim != null) UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
 			// ── NEU: Titelleisten-Styling ──
 			UIManager.put("TitlePane.unifiedBackground",       false); // <--- DAS HIER DEAKTIVIEREN!
 			UIManager.put("TitlePane.background",              new Color(60, 63, 65)); // Hier dein festes Wunsch-Grau
 			UIManager.put("TitlePane.inactiveBackground",      new Color(75, 78, 80));
 			UIManager.put("TitlePane.foreground",              Color.WHITE);
-			UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
+			if (theme.foregroundDim != null) UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
 
 			// FlatLaf UI-Tweaks
 			UIManager.put("Component.arc",                 8);
 			UIManager.put("Button.arc",                    8);
 			UIManager.put("TextComponent.arc",             8);
 			UIManager.put("ScrollBar.thumbArc",            8);
-			UIManager.put("TabbedPane.selectedBackground", theme.backgroundLight);
+			if (theme.backgroundLight != null) UIManager.put("TabbedPane.selectedBackground", theme.backgroundLight);
 			UIManager.put("TabbedPane.showTabSeparators",  true);
 
-			// Basis-Farben für alle Swing-Komponenten
-			UIManager.put("Panel.background",              theme.background);
-			UIManager.put("ScrollPane.background",         theme.background);
-			UIManager.put("Tree.background",               theme.background);
-			UIManager.put("Tree.textBackground",           theme.background);
-			UIManager.put("Tree.textForeground",           theme.foreground);
-			UIManager.put("List.background",               theme.background);
-			UIManager.put("TextArea.background",           theme.background);
-			UIManager.put("TextArea.foreground",           theme.foreground);
-			UIManager.put("TextField.background",          theme.backgroundLight);
-			UIManager.put("TextField.foreground",          theme.foreground);
-			UIManager.put("ComboBox.background",           theme.backgroundLight);
-			UIManager.put("ComboBox.foreground",           theme.foreground);
-			UIManager.put("SplitPane.background",          theme.background);
-			UIManager.put("ToolBar.background",            theme.toolbar);
-			UIManager.put("Label.foreground",              theme.foreground);
+			// Basis-Farben für alle Swing-Komponenten (nur wenn nicht null)
+			if (theme.background != null) UIManager.put("Panel.background",              theme.background);
+			if (theme.background != null) UIManager.put("ScrollPane.background",         theme.background);
+			if (theme.background != null) UIManager.put("Tree.background",               theme.background);
+			if (theme.background != null) UIManager.put("Tree.textBackground",           theme.background);
+			if (theme.foreground != null) UIManager.put("Tree.textForeground",           theme.foreground);
+			if (theme.background != null) UIManager.put("List.background",               theme.background);
+			if (theme.background != null) UIManager.put("TextArea.background",           theme.background);
+			if (theme.foreground != null) UIManager.put("TextArea.foreground",           theme.foreground);
+			if (theme.backgroundLight != null) UIManager.put("TextField.background",          theme.backgroundLight);
+			if (theme.foreground != null) UIManager.put("TextField.foreground",          theme.foreground);
+			if (theme.backgroundLight != null) UIManager.put("ComboBox.background",           theme.backgroundLight);
+			if (theme.foreground != null) UIManager.put("ComboBox.foreground",           theme.foreground);
+			if (theme.background != null) UIManager.put("SplitPane.background",          theme.background);
+			if (theme.toolbar != null) UIManager.put("ToolBar.background",            theme.toolbar);
+			if (theme.foreground != null) UIManager.put("Label.foreground",              theme.foreground);
+			
+			// Apply black toolbar for Fire theme specifically
+			if ("Fire".equals(theme.name)) {
+				UIManager.put("ToolBar.background", new Color(0, 0, 0));
+			}
 
 		} catch (Exception ex) {
 			System.err.println("[ThIDE] FlatLaf-Theme konnte nicht geladen werden: " + ex.getMessage());
@@ -308,7 +313,12 @@ public class MainWindow extends JFrame {
 		JToolBar toolBar = new JToolBar();
 		toolBar.setFloatable(false);
 		toolBar.setBorder(new EmptyBorder(8, 10, 8, 10));
-		toolBar.setBackground(t.toolbar);
+		// For Fire theme, use black toolbar; otherwise use theme toolbar
+		if ("Fire".equals(t.name)) {
+			toolBar.setBackground(new Color(0, 0, 0));
+		} else {
+			toolBar.setBackground(t.toolbar);
+		}
 
 		// ---- Buttons ----
 		btnOpen  = new JButton(LanguageManager.t("open"));
@@ -467,7 +477,7 @@ public class MainWindow extends JFrame {
 				}
 			});
 
-		// ── Layout ───────────────────────────────────────────────────────────
+		// ── Layout ──────────────────────────────────────────────────────────
 		JPanel editorContainer = new JPanel(new BorderLayout());
 		globalSearchPanel = new GlobalSearchPanel(editorManager, editorTabs);
 		editorContainer.add(globalSearchPanel, BorderLayout.SOUTH);
