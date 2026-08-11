@@ -67,7 +67,7 @@ public class SettingsDialog {
 
 
         // ── Theme / Design (IDE Theme + Editor XML getrennt) ───────
-        JPanel themePanel = createSection("Theme / Design", 180);
+        JPanel themePanel = createSection("Theme / Design", 280);
         themePanel.setLayout(new BoxLayout(themePanel, BoxLayout.Y_AXIS));
 
         // 1. IDE Look & Feel
@@ -127,6 +127,56 @@ public class SettingsDialog {
         themeRow.add(txtThemePath, BorderLayout.CENTER);
         themeRow.add(btnBrowse, BorderLayout.EAST);
         themePanel.add(themeRow);
+
+        themePanel.add(Box.createVerticalStrut(12));
+
+        // 3. Custom FlatLaf-Theme (.properties Datei)
+        JLabel lblFlatLafTheme = new JLabel("Custom FlatLaf-Theme (.properties-Datei):");
+        lblFlatLafTheme.setForeground(currentTheme.foregroundDim);
+        lblFlatLafTheme.setAlignmentX(Component.LEFT_ALIGNMENT);
+        themePanel.add(lblFlatLafTheme);
+        themePanel.add(Box.createVerticalStrut(4));
+
+        JPanel flatLafRow = new JPanel(new BorderLayout(10, 0));
+        flatLafRow.setOpaque(false);
+        flatLafRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        flatLafRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField txtFlatLafPath = new JTextField(TIDEPreferences.getFlatLafThemePath());
+        txtFlatLafPath.setBackground(currentTheme.background);
+        txtFlatLafPath.setForeground(currentTheme.foreground);
+        txtFlatLafPath.setCaretColor(currentTheme.foreground);
+        txtFlatLafPath.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(currentTheme.border),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        JButton btnBrowseFlatLaf = new JButton("Durchsuchen...");
+        btnBrowseFlatLaf.setBackground(currentTheme.backgroundLight);
+        btnBrowseFlatLaf.setForeground(currentTheme.foreground);
+        btnBrowseFlatLaf.setFocusPainted(false);
+
+        btnBrowseFlatLaf.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                    "FlatLaf Themes (*.properties)", "properties"));
+            if (chooser.showOpenDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+                txtFlatLafPath.setText(chooser.getSelectedFile().getAbsolutePath());
+            }
+        });
+
+        flatLafRow.add(txtFlatLafPath, BorderLayout.CENTER);
+        flatLafRow.add(btnBrowseFlatLaf, BorderLayout.EAST);
+        themePanel.add(flatLafRow);
+
+        JLabel flatLafHint = new JLabel(
+            "<html>Eigenes FlatLaf-Theme (z.B. mit dem FlatLaf Theme Editor erstellt). "
+            + "Ist hier ein Pfad gesetzt, hat er Vorrang vor dem IDE-Design oben.</html>");
+        flatLafHint.setForeground(currentTheme.foregroundDim);
+        flatLafHint.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        flatLafHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+        themePanel.add(Box.createVerticalStrut(6));
+        themePanel.add(flatLafHint);
 
         JLabel themeHint = new JLabel(
             "<html>Änderungen wirken nach einem Neustart von TIDE.</html>");
@@ -465,6 +515,7 @@ public class SettingsDialog {
                 // Design Speichern
                 TIDEPreferences.saveTheme((String) themeBox.getSelectedItem());
                 TIDEPreferences.saveEditorThemePath(txtThemePath.getText());
+                TIDEPreferences.saveFlatLafThemePath(txtFlatLafPath.getText());
 
                 // Autocomplete-Delay
                 TIDEPreferences.saveAutocompleteDelay(acSlider.getValue());
