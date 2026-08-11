@@ -114,21 +114,27 @@ public class TIDEPreferences {
 		}
 	}
 
-	// ── IDE Look & Feel Theme ──────────────────────────────────────────────
-	public static String getTheme() {
+		public static String getTheme() {
 		return prefs.get("theme", "dark");
 	}
 
 	public static void saveTheme(String theme) {
 		prefs.put("theme", theme);
 	}
-
-	// ── Editor XML-Farbschema Pfad ─────────────────────────────────────────
+	
 	public static String getEditorThemePath() {
 		return prefs.get("editorThemePath", "");
 	}
 
 	public static void saveEditorThemePath(String path) {
 		prefs.put("editorThemePath", path);
+	}
+
+		public static String getFlatLafThemePath() {
+		return prefs.get("flatLafThemePath", "");
+	}
+
+	public static void saveFlatLafThemePath(String path) {
+		prefs.put("flatLafThemePath", path);
 	}
 }

@@ -1,16 +1,16 @@
 import com.formdev.flatlaf.FlatDarkLaf;
 
-public class ThillagersFirstTheme
+public class Fire
 	extends FlatDarkLaf
 {
 	public static final String NAME = "ThillagersFirstTheme";
 
 	public static boolean setup() {
-		return setup( new ThillagersFirstTheme() );
+		return setup( new Fire() );
 	}
 
 	public static void installLafInfo() {
-		installLafInfo( NAME, ThillagersFirstTheme.class );
+		installLafInfo( NAME, Fire.class );
 	}
 
 	@Override
