@@ -33,12 +33,31 @@ public class Theme {
     public final String flatLafClass;    // Steuert welcher FlatLaf-LnF geladen wird
     public final String syntaxTheme;     // RSyntaxTextArea-Theme-Dateiname (ohne .xml)
 
+    // Optionaler Klassenpfad-Ressourcenname (relativ zu src/main/resources) eines
+    // eigenen FlatLaf-".properties"-Themes (z.B. mit dem FlatLaf Theme Editor
+    // erstellt). Wenn gesetzt, wird dieses anstelle von flatLafClass geladen –
+    // es sei denn, der Nutzer hat in den Einstellungen einen eigenen Pfad
+    // hinterlegt (siehe TIDEPreferences.getFlatLafThemePath()), der immer Vorrang hat.
+    // Beispiel: "themes/Fire.properties" → src/main/resources/themes/Fire.properties
+    public final String flatLafPropertiesResource;
+
     public Theme(String name,
                  Color background, Color backgroundLight, Color backgroundHover,
                  Color foreground,  Color foregroundDim,
                  Color accent,      Color accentGreen, Color accentRed,
                  Color border,      Color toolbar,
                  String flatLafClass, String syntaxTheme) {
+        this(name, background, backgroundLight, backgroundHover, foreground, foregroundDim,
+             accent, accentGreen, accentRed, border, toolbar, flatLafClass, syntaxTheme, null);
+    }
+
+    public Theme(String name,
+                 Color background, Color backgroundLight, Color backgroundHover,
+                 Color foreground,  Color foregroundDim,
+                 Color accent,      Color accentGreen, Color accentRed,
+                 Color border,      Color toolbar,
+                 String flatLafClass, String syntaxTheme,
+                 String flatLafPropertiesResource) {
         this.name             = name;
         this.background       = background;
         this.backgroundLight  = backgroundLight;
@@ -52,6 +71,7 @@ public class Theme {
         this.toolbar          = toolbar;
         this.flatLafClass     = flatLafClass;
         this.syntaxTheme      = syntaxTheme;
+        this.flatLafPropertiesResource = flatLafPropertiesResource;
     }
 
     // ── Built-in Themes ──────────────────────────────────────────────────────
@@ -116,8 +136,9 @@ public class Theme {
         new Color(255, 0, 0),        
         new Color(45, 30, 30),       
         new Color(15, 10, 10),       
-        "dark",                      
-        "monokai"
+        "dark",                      // Fallback, falls Fire.properties nicht geladen werden kann
+        "Fire",                      // → sucht zuerst nach "Fire.xml" im resources-Ordner (siehe EditorManager.loadTheme)
+        "themes/Fire.properties"     // → eigenes FlatLaf-Theme aus resources/themes/Fire.properties
     );
 
     public static final Theme MONOKAI = new Theme(
