@@ -51,6 +51,13 @@ public class Theme {
 			accent, accentGreen, accentRed, border, toolbar, flatLafClass, syntaxTheme, null);
 	}
 
+	// Konstruktor für Themes, die ihre Farben aus einer .properties-Ressource beziehen
+public Theme(String name, String flatLafClass, String syntaxTheme, String flatLafPropertiesResource) {
+    this(name, 
+         null, null, null, null, null, null, null, null, null, null, // Farben bleiben null
+         flatLafClass, syntaxTheme, flatLafPropertiesResource);
+}
+
 	public Theme(String name,
 		Color background, Color backgroundLight, Color backgroundHover,
 		Color foreground,  Color foregroundDim,
