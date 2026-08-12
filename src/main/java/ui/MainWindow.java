@@ -191,13 +191,14 @@ public class MainWindow extends JFrame {
 			if (theme.foregroundDim != null) UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
 
 			// FlatLaf UI-Tweaks
-			UIManager.put("Component.arc",                 8);
-			UIManager.put("Button.arc",                    8);
+			//UIManager.put("Component.arc",                 8);
+			//UIManager.put("Button.arc",                    8);
 			UIManager.put("TextComponent.arc",             8);
 			UIManager.put("ScrollBar.thumbArc",            8);
 			if (theme.backgroundLight != null) UIManager.put("TabbedPane.selectedBackground", theme.backgroundLight);
 			UIManager.put("TabbedPane.showTabSeparators",  true);
 
+			/*
 			// Basis-Farben für alle Swing-Komponenten (nur wenn nicht null)
 			if (theme.background != null) UIManager.put("Panel.background",              theme.background);
 			if (theme.background != null) UIManager.put("ScrollPane.background",         theme.background);
@@ -215,10 +216,7 @@ public class MainWindow extends JFrame {
 			if (theme.toolbar != null) UIManager.put("ToolBar.background",            theme.toolbar);
 			if (theme.foreground != null) UIManager.put("Label.foreground",              theme.foreground);
 			
-			// Apply black toolbar for Fire theme specifically
-			if ("Fire".equals(theme.name)) {
-				UIManager.put("ToolBar.background", new Color(0, 0, 0));
-			}
+			*/
 
 		} catch (Exception ex) {
 			System.err.println("[ThIDE] FlatLaf-Theme konnte nicht geladen werden: " + ex.getMessage());
@@ -313,12 +311,7 @@ public class MainWindow extends JFrame {
 		JToolBar toolBar = new JToolBar();
 		toolBar.setFloatable(false);
 		toolBar.setBorder(new EmptyBorder(8, 10, 8, 10));
-		// For Fire theme, use black toolbar; otherwise use theme toolbar
-		if ("Fire".equals(t.name)) {
-			toolBar.setBackground(new Color(0, 0, 0));
-		} else {
-			toolBar.setBackground(t.toolbar);
-		}
+		
 
 		// ---- Buttons ----
 		btnOpen  = new JButton(LanguageManager.t("open"));
@@ -345,7 +338,7 @@ public class MainWindow extends JFrame {
 		runModeSelector.setToolTipText("Standard = normal ausführen | Debug = mit Debugger starten");
 
 		btnRun = new JButton("▶");
-		btnRun.setForeground(t.accentGreen);
+		btnRun.setForeground(new Color(0,255, 0));
 		btnRun.setFont(btnRun.getFont().deriveFont(Font.BOLD));
 
 		btnFormat = new JButton(LanguageManager.t("format"));
@@ -368,23 +361,25 @@ public class MainWindow extends JFrame {
 		btnSettings.addActionListener(e -> settingsDialog.show());
 
 		// Button-Styling aus Theme
-		Border btnOutline  = new LineBorder(t.border, 2);
+		Color defaultBorderColor = UIManager.getColor("Button.borderColor");
+		Border btnOutline  = new LineBorder(defaultBorderColor, 2);
 		Border btnPadding  = BorderFactory.createEmptyBorder(5, 10, 5, 10);
 		Border btnBorder   = BorderFactory.createCompoundBorder(btnOutline, btnPadding);
 
-		Color btnBg    = t.backgroundLight;
-		Color btnHover = t.backgroundHover;
+		//Color btnBg    = t.backgroundLight;
+		//Color btnHover = t.backgroundHover;
 
 		JButton[] borderButtons = {btnFormat, btnOpen, btnSave, btnTBuild, btnAbout, btnSettings, btnHotSwap, btnClear};
 		for (JButton btn : borderButtons) {
 			btn.setBorder(btnBorder);
-			btn.setBackground(btnBg);
+			//btn.setBackground(btnBg);
 			btn.setContentAreaFilled(true);
 			btn.setOpaque(true);
-			btn.addMouseListener(new MouseAdapter() {
-					@Override public void mouseEntered(MouseEvent e) { btn.setBackground(btnHover); }
-					@Override public void mouseExited(MouseEvent e)  { btn.setBackground(btnBg); }
-				});
+			//btn.addMouseListener(new MouseAdapter() {
+			//		@Override public void mouseEntered(MouseEvent e) { btn.setBackground(btnHover); }
+			//		@Override public void mouseExited(MouseEvent e)  { btn.setBackground(btnBg); }
+			//	});
+			btn.putClientProperty("JButton.arc", 999);
 		}
 
 		// ── Git-Dropdown ─────────────────────────────────────────────────────
