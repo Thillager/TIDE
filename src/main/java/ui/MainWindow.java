@@ -194,11 +194,14 @@ public class MainWindow extends JFrame {
 
 			// FlatLaf UI-Tweaks
 			//UIManager.put("Component.arc",                 8);
-			//UIManager.put("Button.arc",                    8);
+			UIManager.put("Button.arc",                    12);
 			UIManager.put("TextComponent.arc",             8);
 			UIManager.put("ScrollBar.thumbArc",            8);
 			if (theme.backgroundLight != null) UIManager.put("TabbedPane.selectedBackground", theme.backgroundLight);
 			UIManager.put("TabbedPane.showTabSeparators",  true);
+
+			UIManager.put("ToolBar.paintButtons", true);
+			UIManager.put("ToolBar.buttonBorderPainted", true);
 
 			/*
 			// Basis-Farben für alle Swing-Komponenten (nur wenn nicht null)
@@ -217,7 +220,7 @@ public class MainWindow extends JFrame {
 			if (theme.background != null) UIManager.put("SplitPane.background",          theme.background);
 			if (theme.toolbar != null) UIManager.put("ToolBar.background",            theme.toolbar);
 			if (theme.foreground != null) UIManager.put("Label.foreground",              theme.foreground);
-			
+
 			*/
 
 		} catch (Exception ex) {
@@ -244,7 +247,7 @@ public class MainWindow extends JFrame {
 					return true;
 				} catch (Exception ex) {
 					System.err.println("[ThIDE] Custom FlatLaf-Theme-Datei konnte nicht geladen werden: "
-							+ ex.getMessage());
+						+ ex.getMessage());
 				}
 			} else {
 				System.err.println("[ThIDE] Custom FlatLaf-Theme-Datei nicht gefunden: " + customPath);
@@ -254,17 +257,17 @@ public class MainWindow extends JFrame {
 		// 2. Vom Theme mitgebrachtes .properties-Theme (z.B. Fire.properties)
 		if (theme.flatLafPropertiesResource != null && !theme.flatLafPropertiesResource.isBlank()) {
 			try (java.io.InputStream is = MainWindow.class.getClassLoader()
-					.getResourceAsStream(theme.flatLafPropertiesResource)) {
+				.getResourceAsStream(theme.flatLafPropertiesResource)) {
 				if (is != null) {
 					UIManager.setLookAndFeel(new FlatPropertiesLaf(theme.name, is));
 					return true;
 				} else {
 					System.err.println("[ThIDE] FlatLaf-Theme-Ressource nicht gefunden: "
-							+ theme.flatLafPropertiesResource);
+						+ theme.flatLafPropertiesResource);
 				}
 			} catch (Exception ex) {
 				System.err.println("[ThIDE] FlatLaf-Theme-Ressource konnte nicht geladen werden: "
-						+ ex.getMessage());
+					+ ex.getMessage());
 			}
 		}
 
@@ -313,7 +316,7 @@ public class MainWindow extends JFrame {
 		JToolBar toolBar = new JToolBar();
 		toolBar.setFloatable(false);
 		toolBar.setBorder(new EmptyBorder(8, 10, 8, 10));
-		
+
 
 		// ---- Buttons ----
 		btnOpen  = new JButton(LanguageManager.t("open"));
@@ -363,18 +366,18 @@ public class MainWindow extends JFrame {
 		btnSettings.addActionListener(e -> settingsDialog.show());
 
 		Color defaultBorderColor = UIManager.getColor("Button.borderColor");
-if (defaultBorderColor == null) defaultBorderColor = UIManager.getColor("Component.borderColor");
-if (defaultBorderColor == null) defaultBorderColor = Color.GRAY;
+		if (defaultBorderColor == null) defaultBorderColor = UIManager.getColor("Component.borderColor");
+		if (defaultBorderColor == null) defaultBorderColor = Color.GRAY;
 
-FlatLineBorder roundedOutline = new FlatLineBorder(new Insets(1, 1, 1, 1), defaultBorderColor, 1.5f, 999);
-Border btnPadding = BorderFactory.createEmptyBorder(5, 10, 5, 10);
-Border customRoundedBorder = BorderFactory.createCompoundBorder(roundedOutline, btnPadding);
+		FlatLineBorder roundedOutline = new FlatLineBorder(new Insets(1, 1, 1, 1), defaultBorderColor, 1.5f, 12);
+		Border btnPadding = BorderFactory.createEmptyBorder(5, 10, 5, 10);
+		Border customRoundedBorder = BorderFactory.createCompoundBorder(roundedOutline, btnPadding);
 
 
 		//Color btnBg    = t.backgroundLight;
 		//Color btnHover = t.backgroundHover;
 
-		JButton[] borderButtons = {btnFormat, btnOpen, btnSave, btnTBuild, btnAbout, btnSettings, btnHotSwap, btnClear};
+		/* JButton[] borderButtons = {btnFormat, btnOpen, btnSave, btnTBuild, btnAbout, btnSettings, btnHotSwap, btnClear};
 		for (JButton btn : borderButtons) {
 			btn.setBorder(customRoundedBorder);
 			btn.setMargin(new Insets(5, 10, 5, 10));
@@ -384,10 +387,42 @@ Border customRoundedBorder = BorderFactory.createCompoundBorder(roundedOutline, 
 			//btn.setContentAreaFilled(true);
 			//btn.setOpaque(true);
 			//btn.addMouseListener(new MouseAdapter() {
-			//		@Override public void mouseEntered(MouseEvent e) { btn.setBackground(btnHover); }
-			//		@Override public void mouseExited(MouseEvent e)  { btn.setBackground(btnBg); }
-			//	});
+					//		@Override public void mouseEntered(MouseEvent e) { btn.setBackground(btnHover); }
+					//		@Override public void mouseExited(MouseEvent e)  { btn.setBackground(btnBg); }
+					//	});
 			// btn.putClientProperty("JButton.arc", 999);
+		} */
+
+		// Ersetze die bestehende Buttons-Schleife durch diese Version:
+		JButton[] borderButtons = {
+			btnFormat, btnOpen, btnSave, btnTBuild, btnAbout, btnSettings, btnHotSwap, btnClear,
+			btnRun, btnTerminate
+		};
+		for (JButton btn : borderButtons) {
+			// 1. Zwingt den Button, seine eigene Fläche voll zu zeichnen (verhindert Toolbar-Transparenz)
+			btn.putClientProperty("JToolBar.isToolbarButton", Boolean.FALSE);
+			btn.setContentAreaFilled(true);
+			btn.setOpaque(true);
+
+			// 2. Weist FlatLaf an, den Button als Standard-Button mit Abrundung zu behandeln
+			btn.putClientProperty("JButton.buttonType", "default");
+
+			// 3. Setzt Rahmen, Hover-Rahmen und die runde Hover-Farbe über das FlatLaf Style-System
+			btn.putClientProperty("FlatLaf.style",
+				"margin: 5,10,5,10; " +
+				"borderWidth: 1.5; " +
+				"borderColor: #888888; " +          // Standard-Randfarbe (anpassbar)
+				"hoverBorderColor: #AAAAAA; " +     // Hover-Randfarbe (anpassbar)
+				"focusedBorderColor: #FF4D4D; " +
+				"hoverBackground: #3D2626; " +
+				"focusWidth: 0"
+			);
+
+			// 4. Sichtbarer, abgerundeter Swing-Rand (nutzt customRoundedBorder aus weiter oben)
+			btn.setBorder(customRoundedBorder);
+			btn.setBorderPainted(true);
+			btn.setMargin(new Insets(5, 10, 5, 10));
+			btn.setFocusPainted(false);
 		}
 
 		// ── Git-Dropdown ─────────────────────────────────────────────────────
@@ -839,4 +874,8 @@ Border customRoundedBorder = BorderFactory.createCompoundBorder(roundedOutline, 
 		}
 		return null;
 	}
+	// Helper: Color -> hex (füge irgendwo in der Klasse hinzu)
+private static String colorToHex(Color c) {
+    return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+}
 }
