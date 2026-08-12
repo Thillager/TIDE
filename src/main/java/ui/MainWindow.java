@@ -371,15 +371,16 @@ public class MainWindow extends JFrame {
 
 		JButton[] borderButtons = {btnFormat, btnOpen, btnSave, btnTBuild, btnAbout, btnSettings, btnHotSwap, btnClear};
 		for (JButton btn : borderButtons) {
-			btn.setBorder(btnBorder);
+			//btn.setBorder(btnBorder);
+			btn.setMargin(new Insets(5, 10, 5, 10));
 			//btn.setBackground(btnBg);
-			btn.setContentAreaFilled(true);
-			btn.setOpaque(true);
+			//btn.setContentAreaFilled(true);
+			//btn.setOpaque(true);
 			//btn.addMouseListener(new MouseAdapter() {
 			//		@Override public void mouseEntered(MouseEvent e) { btn.setBackground(btnHover); }
 			//		@Override public void mouseExited(MouseEvent e)  { btn.setBackground(btnBg); }
 			//	});
-			btn.putClientProperty("JButton.arc", 999);
+			// btn.putClientProperty("JButton.arc", 999);
 		}
 
 		// ── Git-Dropdown ─────────────────────────────────────────────────────
