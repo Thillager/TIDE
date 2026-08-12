@@ -12,6 +12,8 @@ import config.TIDEPreferences;
 import config.Theme;
 import ui.SettingsDialog;
 
+import com.formdev.flatlaf.ui.FlatLineBorder;
+
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.FlatPropertiesLaf;
@@ -360,19 +362,24 @@ public class MainWindow extends JFrame {
 		JButton btnSettings = new JButton("⚙");
 		btnSettings.addActionListener(e -> settingsDialog.show());
 
-		// Button-Styling aus Theme
 		Color defaultBorderColor = UIManager.getColor("Button.borderColor");
-		Border btnOutline  = new LineBorder(defaultBorderColor, 2);
-		Border btnPadding  = BorderFactory.createEmptyBorder(5, 10, 5, 10);
-		Border btnBorder   = BorderFactory.createCompoundBorder(btnOutline, btnPadding);
+if (defaultBorderColor == null) defaultBorderColor = UIManager.getColor("Component.borderColor");
+if (defaultBorderColor == null) defaultBorderColor = Color.GRAY;
+
+FlatLineBorder roundedOutline = new FlatLineBorder(new Insets(1, 1, 1, 1), defaultBorderColor, 1.5f, 999);
+Border btnPadding = BorderFactory.createEmptyBorder(5, 10, 5, 10);
+Border customRoundedBorder = BorderFactory.createCompoundBorder(roundedOutline, btnPadding);
+
 
 		//Color btnBg    = t.backgroundLight;
 		//Color btnHover = t.backgroundHover;
 
 		JButton[] borderButtons = {btnFormat, btnOpen, btnSave, btnTBuild, btnAbout, btnSettings, btnHotSwap, btnClear};
 		for (JButton btn : borderButtons) {
-			//btn.setBorder(btnBorder);
+			btn.setBorder(customRoundedBorder);
 			btn.setMargin(new Insets(5, 10, 5, 10));
+			btn.putClientProperty("JButton.outline", "default");
+			btn.putClientProperty("JButton.buttonType", "roundRect");
 			//btn.setBackground(btnBg);
 			//btn.setContentAreaFilled(true);
 			//btn.setOpaque(true);
