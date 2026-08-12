@@ -193,17 +193,17 @@ public class MainWindow extends JFrame {
 			if (theme.foregroundDim != null) UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
 
 			// FlatLaf UI-Tweaks
-			//UIManager.put("Component.arc",                 8);
+			UIManager.put("Component.arc",                 12);
 			UIManager.put("Button.arc",                    12);
-			UIManager.put("TextComponent.arc",             8);
-			UIManager.put("ScrollBar.thumbArc",            8);
+			UIManager.put("TextComponent.arc",             12);
+			UIManager.put("ScrollBar.thumbArc",            12);
 			if (theme.backgroundLight != null) UIManager.put("TabbedPane.selectedBackground", theme.backgroundLight);
 			UIManager.put("TabbedPane.showTabSeparators",  true);
 
 			UIManager.put("ToolBar.paintButtons", true);
 			UIManager.put("ToolBar.buttonBorderPainted", true);
 
-			/*
+			
 			// Basis-Farben für alle Swing-Komponenten (nur wenn nicht null)
 			if (theme.background != null) UIManager.put("Panel.background",              theme.background);
 			if (theme.background != null) UIManager.put("ScrollPane.background",         theme.background);
@@ -221,7 +221,7 @@ public class MainWindow extends JFrame {
 			if (theme.toolbar != null) UIManager.put("ToolBar.background",            theme.toolbar);
 			if (theme.foreground != null) UIManager.put("Label.foreground",              theme.foreground);
 
-			*/
+			
 
 		} catch (Exception ex) {
 			System.err.println("[ThIDE] FlatLaf-Theme konnte nicht geladen werden: " + ex.getMessage());
