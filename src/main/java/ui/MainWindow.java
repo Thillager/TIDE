@@ -179,49 +179,20 @@ public class MainWindow extends JFrame {
 				}
 			}
 
-			// ── NEU: Titelleisten-Styling (Anhand deines aktuellen Themes) ──
-			// Nutzt ein passendes Grau/Hintergrundfarbe deines aktiven Themes
-			if (theme.backgroundLight != null) UIManager.put("TitlePane.background",              theme.backgroundLight);
-			if (theme.background != null) UIManager.put("TitlePane.inactiveBackground",      theme.background);
-			if (theme.foreground != null) UIManager.put("TitlePane.foreground",              theme.foreground);
-			if (theme.foregroundDim != null) UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
-			// ── NEU: Titelleisten-Styling ──
-			UIManager.put("TitlePane.unifiedBackground",       false); // <--- DAS HIER DEAKTIVIEREN!
-			UIManager.put("TitlePane.background",              new Color(60, 63, 65)); // Hier dein festes Wunsch-Grau
-			UIManager.put("TitlePane.inactiveBackground",      new Color(75, 78, 80));
-			UIManager.put("TitlePane.foreground",              Color.WHITE);
-			if (theme.foregroundDim != null) UIManager.put("TitlePane.inactiveForeground",      theme.foregroundDim);
-
-			// FlatLaf UI-Tweaks
-			UIManager.put("Component.arc",                 12);
-			UIManager.put("Button.arc",                    12);
-			UIManager.put("TextComponent.arc",             12);
-			UIManager.put("ScrollBar.thumbArc",            12);
-			if (theme.backgroundLight != null) UIManager.put("TabbedPane.selectedBackground", theme.backgroundLight);
-			UIManager.put("TabbedPane.showTabSeparators",  true);
-
-			UIManager.put("ToolBar.paintButtons", true);
-			UIManager.put("ToolBar.buttonBorderPainted", true);
-
-			
-			// Basis-Farben für alle Swing-Komponenten (nur wenn nicht null)
-			if (theme.background != null) UIManager.put("Panel.background",              theme.background);
-			if (theme.background != null) UIManager.put("ScrollPane.background",         theme.background);
-			if (theme.background != null) UIManager.put("Tree.background",               theme.background);
-			if (theme.background != null) UIManager.put("Tree.textBackground",           theme.background);
-			if (theme.foreground != null) UIManager.put("Tree.textForeground",           theme.foreground);
-			if (theme.background != null) UIManager.put("List.background",               theme.background);
-			if (theme.background != null) UIManager.put("TextArea.background",           theme.background);
-			if (theme.foreground != null) UIManager.put("TextArea.foreground",           theme.foreground);
-			if (theme.backgroundLight != null) UIManager.put("TextField.background",          theme.backgroundLight);
-			if (theme.foreground != null) UIManager.put("TextField.foreground",          theme.foreground);
-			if (theme.backgroundLight != null) UIManager.put("ComboBox.background",           theme.backgroundLight);
-			if (theme.foreground != null) UIManager.put("ComboBox.foreground",           theme.foreground);
-			if (theme.background != null) UIManager.put("SplitPane.background",          theme.background);
-			if (theme.toolbar != null) UIManager.put("ToolBar.background",            theme.toolbar);
-			if (theme.foreground != null) UIManager.put("Label.foreground",              theme.foreground);
-
-			
+			// Ab hier NUR noch offiziell von FlatLaf dokumentierte Stil-Parameter
+			// (Eckenradius, Tab-Trenner, Toolbar-Rahmen) - keine einzelne Farbe
+			// wird mehr manuell nachträglich überschrieben. Panel-, Baum-,
+			// Listen-, Titelleisten- und sonstige Farben kommen vollständig aus
+			// dem geladenen LnF selbst (entweder einer echten FlatLaf-Klasse
+			// oder, für Fire/eigene Themes, aus der zugehörigen .properties-
+			// Ressource via loadCustomFlatLaf() - siehe dort).
+			UIManager.put("Component.arc",                8);
+			UIManager.put("Button.arc",                   8);
+			UIManager.put("TextComponent.arc",            8);
+			UIManager.put("ScrollBar.thumbArc",           8);
+			UIManager.put("TabbedPane.showTabSeparators", true);
+			UIManager.put("ToolBar.paintButtons",         true);
+			UIManager.put("ToolBar.buttonBorderPainted",  true);
 
 		} catch (Exception ex) {
 			System.err.println("[ThIDE] FlatLaf-Theme konnte nicht geladen werden: " + ex.getMessage());
@@ -635,6 +606,11 @@ public class MainWindow extends JFrame {
 		// ── windowClosing: alle Prefs auf einmal speichern ───────────────────
 		addWindowListener(new WindowAdapter() {
 				@Override public void windowClosing(WindowEvent e) {
+					// Falls LSP-Vervollständigung aktiv war: laufende
+					// Language-Server-Prozesse sauber beenden, damit beim
+					// Beenden von ThIDE keine Prozesse zurückbleiben.
+					lsp.LspManager.getInstance().shutdownAll();
+
 					TIDEPreferences.saveWindowWidth(getWidth());
 					TIDEPreferences.saveWindowHeight(getHeight());
 					if (currentProjectFolder != null)

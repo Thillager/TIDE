@@ -133,19 +133,19 @@ public Theme(String name, String flatLafClass, String syntaxTheme, String flatLa
 
 	public static final Theme Fire = new Theme(
 		"Fire",
-/*		new Color(15, 10, 10),       // Noch dunkleres Hintergrund-Schwarz
-		new Color(35, 20, 20),
-		new Color(55, 25, 25),
-		new Color(245, 245, 245),
-		new Color(150, 130, 130),
-		new Color(255, 0, 0),        // Akzent: Richtiges reines Rot (FF0000)
-		new Color(50, 180, 90),
-		new Color(255, 0, 0),
-		new Color(45, 30, 30),
-		new Color(15, 10, 10),
-	*/	"dark",                      // Fallback, falls Fire.properties nicht geladen werden kann
-		"Fire",                      // → sucht zuerst nach "Fire.xml" im resources-Ordner (siehe EditorManager.loadTheme)
-		"themes/Fire.properties"     // → eigenes FlatLaf-Theme aus resources/themes/Fire.properties
+		new Color(15, 10, 10),       // background         - Noch dunkleres Hintergrund-Schwarz (passend zu Fire.properties @background)
+		new Color(35, 20, 20),       // backgroundLight
+		new Color(55, 25, 25),       // backgroundHover
+		new Color(245, 245, 245),    // foreground
+		new Color(150, 130, 130),    // foregroundDim
+		new Color(255, 0, 0),        // accent             - Richtiges reines Rot (passend zu Fire.properties @accentColor)
+		new Color(50, 180, 90),      // accentGreen
+		new Color(255, 0, 0),        // accentRed
+		new Color(45, 30, 30),       // border
+		new Color(15, 10, 10),       // toolbar
+		"dark",                      // flatLafClass - Fallback, falls Fire.properties nicht geladen werden kann
+		"Fire",                      // syntaxTheme  - sucht zuerst nach "fire.xml" im resources-Ordner (siehe EditorManager.loadTheme)
+		"themes/Fire.properties"     // flatLafPropertiesResource - eigenes FlatLaf-Theme aus resources/themes/Fire.properties
 	);
 
 	public static final Theme MONOKAI = new Theme(

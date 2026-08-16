@@ -7,19 +7,26 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import ui.ConsolePanel;
 import ui.WordManagerDialog;
 import ui.MainWindow;
+import config.CompletionMode;
 import config.TIDEPreferences;
 import config.TIDEProperties;
+import lsp.LspClient;
+import lsp.LspCompletionProvider;
+import lsp.LspManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +42,16 @@ public class EditorManager {
     private final ConsolePanel consolePanel;
     private final WordManagerDialog wordManagerDialog;
     private OutlinePanel outlinePanel;
+
+    // ── Code-Vervollständigung: pro offenem Tab verwaltete Zustände ────────
+    // Damit beim Umschalten des Modus in den Einstellungen
+    // (refreshCompletionProviders) oder beim automatischen Hochstufen nach
+    // erfolgreicher Hintergrund-Bereitstellung (upgradeTabsForLanguage) bzw.
+    // beim Schließen eines Tabs die jeweils aktive AutoCompletion sauber
+    // deinstalliert bzw. eine laufende LSP-Bindung sauber geschlossen werden kann.
+    private final Map<Component, AutoCompletion> autoCompletions     = new HashMap<>();
+    private final Map<Component, LspCompletionProvider> lspProviders = new HashMap<>();
+    private final Map<Component, JButton> manageWordsButtons          = new HashMap<>();
 
     public EditorManager(JFrame parent, JTabbedPane editorTabs, Map<Component, File> openFiles,
             ConsolePanel consolePanel, WordManagerDialog wordManagerDialog) {
@@ -372,6 +389,11 @@ public class EditorManager {
             closeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
             closeBtn.addActionListener(e -> {
                 if (timerRef != null) timerRef.stop();
+                AutoCompletion ac = autoCompletions.remove(sp);
+                if (ac != null) ac.uninstall();
+                LspCompletionProvider lp = lspProviders.remove(sp);
+                if (lp != null) lp.close(); // beendet nur die Bindung dieses Tabs (didClose), nicht den Server-Prozess
+                manageWordsButtons.remove(sp);
                 openFiles.remove(sp);
                 editorTabs.remove(sp);
             });
@@ -387,47 +409,6 @@ public class EditorManager {
                 outlinePanel.refresh(textArea, file.getName());
             }
 
-            DefaultCompletionProvider provider = createCompletionProvider(textArea);
-            AutoCompletion ac = new AutoCompletion(provider);
-            ac.setAutoCompleteSingleChoices(false);
-            ac.setAutoActivationEnabled(true);
-            ac.setAutoActivationDelay(TIDEProperties.AUTOCOMPLETE_DELAY);
-            ac.install(textArea);
-
-            Set<String> knownWords = new HashSet<>();
-            String[] initialKeywords = {"public", "private", "static", "void", "class", "import",
-                    "String", "int", "boolean", "new", "return"};
-            knownWords.addAll(Arrays.asList(initialKeywords));
-            String existingContent = textArea.getText();
-            if (existingContent != null) {
-                for (String t : existingContent.split("[^\\w]+")) {
-                    if (t.length() > TIDEProperties.AUTOCOMPLETE_MIN_LEN) knownWords.add(t);
-                }
-            }
-
-            textArea.addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyReleased(KeyEvent e) {
-                    char c = e.getKeyChar();
-                    if (!Character.isLetterOrDigit(c) && c != KeyEvent.CHAR_UNDEFINED) {
-                        try {
-                            int caret = textArea.getCaretPosition() - 1;
-                            if (caret < 1) return;
-                            String text = textArea.getText(0, caret);
-                            int start   = caret - 1;
-                            while (start >= 0 && Character.isLetterOrDigit(text.charAt(start))) start--;
-                            start++;
-                            if (start < caret) {
-                                String word = text.substring(start, caret);
-                                if (word.length() > TIDEProperties.AUTOCOMPLETE_MIN_LEN && knownWords.add(word)) {
-                                    provider.addCompletion(new BasicCompletion(provider, word));
-                                }
-                            }
-                        } catch (Exception ignored) {}
-                    }
-                }
-            });
-
             JButton manageWordsBtn = new JButton("Wörter");
             manageWordsBtn.setFont(manageWordsBtn.getFont().deriveFont(10f));
             manageWordsBtn.setForeground(new Color(180, 180, 255));
@@ -435,11 +416,210 @@ public class EditorManager {
             manageWordsBtn.setContentAreaFilled(false);
             manageWordsBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
             manageWordsBtn.setToolTipText("Gelernte Wörter verwalten / löschen");
-            manageWordsBtn.addActionListener(ev -> wordManagerDialog.show(provider, knownWords));
             tabHeader.add(manageWordsBtn);
+            manageWordsButtons.put(sp, manageWordsBtn);
+
+            installCompletion(sp, textArea, file, manageWordsBtn);
 
         } catch (Exception e) {
             consolePanel.log("Öffnen fehlgeschlagen\n", Color.RED);
+        }
+    }
+
+    /**
+     * Installiert die Code-Vervollständigung für einen Editor-Tab, passend
+     * zum aktuell in den Einstellungen gewählten Modus
+     * (TIDEPreferences.getCompletionMode()):
+     *
+     *  - WORD_BASED: die bisherige, wortbasierte Vervollständigung.
+     *  - LSP:        intelligente Vervollständigung über einen
+     *                Language-Server. Läuft für die Dateisprache bereits
+     *                einer, wird er sofort verwendet. Andernfalls startet
+     *                dieser Tab zunächst mit Wortvervollständigung (damit
+     *                der Editor sofort benutzbar bleibt) und LspManager
+     *                besorgt/installiert und startet den passenden Server
+     *                vollautomatisch im Hintergrund (kein Eintragen eines
+     *                Kommandos nötig) - sobald er bereitsteht, wird dieser
+     *                (und jeder andere offene) Tab derselben Sprache
+     *                automatisch auf LSP hochgestuft, siehe
+     *                upgradeTabsForLanguage().
+     *
+     * Eine bereits vorhandene AutoCompletion/LSP-Bindung für diesen Tab
+     * wird zuerst sauber entfernt (wichtig für refreshCompletionProviders,
+     * wenn der Nutzer den Modus zur Laufzeit umschaltet, und für das
+     * automatische Hochstufen nach erfolgreicher Bereitstellung).
+     */
+    private void installCompletion(RTextScrollPane sp, RSyntaxTextArea textArea, File file, JButton manageWordsBtn) {
+        AutoCompletion oldAc = autoCompletions.remove(sp);
+        if (oldAc != null) oldAc.uninstall();
+        LspCompletionProvider oldLsp = lspProviders.remove(sp);
+        if (oldLsp != null) oldLsp.close();
+
+        CompletionMode mode = TIDEPreferences.getCompletionMode();
+        String languageId = languageIdForFile(file);
+
+        LspClient client = null;
+        if (mode == CompletionMode.LSP && languageId != null) {
+            client = LspManager.getInstance().getIfRunning(languageId);
+            if (client == null) {
+                // Server läuft noch nicht -> vollautomatisch im Hintergrund
+                // besorgen/installieren/starten (kein Zutun nötig). Dieser
+                // Tab arbeitet bis dahin mit Wortvervollständigung weiter
+                // und wird beim Callback automatisch hochgestuft.
+                LspManager.getInstance().requestAsync(languageId, file.getParentFile(), consolePanel,
+                    readyClient -> upgradeTabsForLanguage(languageId));
+            }
+        }
+
+        CompletionProvider provider;
+        if (client != null) {
+            LspCompletionProvider lp = new LspCompletionProvider(client, textArea, file, languageId);
+            provider = lp;
+            lspProviders.put(sp, lp);
+            removeWordLearningListener(textArea);
+            if (manageWordsBtn != null) manageWordsBtn.setVisible(false);
+        } else {
+            if (mode == CompletionMode.LSP && languageId != null) {
+                consolePanel.log("[LSP] Language-Server für '" + languageId
+                    + "' wird automatisch im Hintergrund vorbereitet (kann beim allerersten Mal etwas dauern) – "
+                    + "bis dahin Wortvervollständigung.\n", Color.ORANGE);
+            }
+            provider = installWordBasedCompletion(textArea, manageWordsBtn);
+        }
+
+        AutoCompletion ac = new AutoCompletion(provider);
+        ac.setAutoCompleteSingleChoices(false);
+        ac.setAutoActivationEnabled(true);
+        ac.setAutoActivationDelay(TIDEPreferences.getAutocompleteDelay());
+        ac.install(textArea);
+        autoCompletions.put(sp, ac);
+    }
+
+    /** Baut die bisherige, wortbasierte Vervollständigung für einen Tab auf und verdrahtet den "Wörter"-Button. */
+    private DefaultCompletionProvider installWordBasedCompletion(RSyntaxTextArea textArea, JButton manageWordsBtn) {
+        DefaultCompletionProvider provider = createCompletionProvider(textArea);
+
+        Set<String> knownWords = new HashSet<>();
+        String[] initialKeywords = {"public", "private", "static", "void", "class", "import",
+            "String", "int", "boolean", "new", "return"};
+        knownWords.addAll(Arrays.asList(initialKeywords));
+        String existingContent = textArea.getText();
+        if (existingContent != null) {
+            for (String t : existingContent.split("[^\\w]+")) {
+                if (t.length() > TIDEProperties.AUTOCOMPLETE_MIN_LEN) knownWords.add(t);
+            }
+        }
+
+        removeWordLearningListener(textArea);
+        textArea.addKeyListener(new WordLearningKeyListener(textArea, provider, knownWords));
+
+        if (manageWordsBtn != null) {
+            manageWordsBtn.setVisible(true);
+            for (ActionListener al : manageWordsBtn.getActionListeners()) manageWordsBtn.removeActionListener(al);
+            manageWordsBtn.addActionListener(ev -> wordManagerDialog.show(provider, knownWords));
+        }
+
+        return provider;
+    }
+
+    private void removeWordLearningListener(RSyntaxTextArea textArea) {
+        for (KeyListener kl : textArea.getKeyListeners()) {
+            if (kl instanceof WordLearningKeyListener) textArea.removeKeyListener(kl);
+        }
+    }
+
+    /** Ermittelt, für welche LSP-Sprache eine Datei ggf. in Frage kommt. Aktuell werden Java und Python unterstützt; für alle anderen Dateitypen wird stets wortbasiert vervollständigt. */
+    private String languageIdForFile(File file) {
+        String n = file.getName().toLowerCase();
+        if (n.endsWith(".java")) return "java";
+        if (n.endsWith(".py"))   return "python";
+        return null;
+    }
+
+    /**
+     * Wird von den Einstellungen aufgerufen, nachdem der Nutzer den
+     * Vervollständigungsmodus geändert und übernommen hat. Baut die
+     * Vervollständigung für alle bereits offenen Tabs entsprechend dem
+     * neuen Modus neu auf.
+     *
+     * Wurde der LSP-Modus dabei ausgeschaltet, werden anschließend alle
+     * eventuell noch laufenden bzw. in Beschaffung befindlichen
+     * Language-Server beendet/abgebrochen – ab diesem Zeitpunkt verbraucht
+     * die Vervollständigung wieder exakt null zusätzliche
+     * Prozess-/Speicherressourcen.
+     */
+    public void refreshCompletionProviders() {
+        for (int i = 0; i < editorTabs.getTabCount(); i++) {
+            Component tab = editorTabs.getComponentAt(i);
+            if (!(tab instanceof RTextScrollPane sp)) continue;
+            File file = openFiles.get(sp);
+            if (file == null) continue;
+            RSyntaxTextArea textArea = (RSyntaxTextArea) sp.getTextArea();
+            installCompletion(sp, textArea, file, manageWordsButtons.get(sp));
+        }
+
+        if (TIDEPreferences.getCompletionMode() != CompletionMode.LSP) {
+            LspManager.getInstance().shutdownAll();
+        }
+    }
+
+    /**
+     * Wird von LspManager aufgerufen (auf dem EDT), sobald ein
+     * Language-Server für eine Sprache im Hintergrund fertig
+     * bereitgestellt wurde. Stuft alle bereits offenen Tabs dieser Sprache,
+     * die noch mit Wortvervollständigung laufen, transparent auf die
+     * intelligente LSP-Vervollständigung hoch – der Nutzer muss dafür
+     * nichts tun, das passiert vollautomatisch im Hintergrund.
+     */
+    private void upgradeTabsForLanguage(String languageId) {
+        for (int i = 0; i < editorTabs.getTabCount(); i++) {
+            Component tab = editorTabs.getComponentAt(i);
+            if (!(tab instanceof RTextScrollPane sp)) continue;
+            File file = openFiles.get(sp);
+            if (file == null || !languageId.equals(languageIdForFile(file))) continue;
+            if (lspProviders.containsKey(sp)) continue; // läuft bereits über LSP
+            RSyntaxTextArea textArea = (RSyntaxTextArea) sp.getTextArea();
+            installCompletion(sp, textArea, file, manageWordsButtons.get(sp));
+        }
+    }
+
+    /**
+     * KeyListener, der im wortbasierten Modus neu getippte Wörter "lernt"
+     * und dem übergebenen Provider hinzufügt. Als benannte Klasse (statt
+     * anonym) implementiert, damit installCompletion()/refreshCompletionProviders()
+     * eine ggf. vorhandene alte Instanz beim erneuten Aufbau zuverlässig
+     * per instanceof wiederfinden und entfernen kann.
+     */
+    private static final class WordLearningKeyListener extends KeyAdapter {
+        private final RSyntaxTextArea textArea;
+        private final DefaultCompletionProvider provider;
+        private final Set<String> knownWords;
+
+        WordLearningKeyListener(RSyntaxTextArea textArea, DefaultCompletionProvider provider, Set<String> knownWords) {
+            this.textArea   = textArea;
+            this.provider   = provider;
+            this.knownWords = knownWords;
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            char c = e.getKeyChar();
+            if (!Character.isLetterOrDigit(c) && c != KeyEvent.CHAR_UNDEFINED) {
+                try {
+                    int caret = textArea.getCaretPosition() - 1;
+                    if (caret < 1) return;
+                    String text = textArea.getText(0, caret);
+                    int start   = caret - 1;
+                    while (start >= 0 && Character.isLetterOrDigit(text.charAt(start))) start--;
+                    start++;
+                    if (start < caret) {
+                        String word = text.substring(start, caret);
+                        if (word.length() > TIDEProperties.AUTOCOMPLETE_MIN_LEN && knownWords.add(word)) {
+                            provider.addCompletion(new BasicCompletion(provider, word));
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
         }
     }
 

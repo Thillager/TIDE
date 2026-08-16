@@ -137,4 +137,19 @@ public class TIDEPreferences {
 	public static void saveFlatLafThemePath(String path) {
 		prefs.put("flatLafThemePath", path);
 	}
+
+	// ── Code-Vervollständigung ───────────────────────────────────────────
+	// Wortbasiert (bisheriges Verhalten) vs. intelligent über Language
+	// Server Protocol. Der LSP-Modus startet Server-Prozesse nur, wenn er
+	// hier auch tatsächlich aktiv ist. Die passenden Server (Java: Eclipse
+	// JDT LS, Python: python-lsp-server) werden dann vollautomatisch im
+	// Hintergrund beschafft und gestartet - siehe lsp.LspProvisioner /
+	// lsp.LspManager. Es gibt bewusst keine Einstellung für ein manuelles
+	// Server-Kommando, dafür ist nichts einzutragen.
+	public static CompletionMode getCompletionMode() {
+		return CompletionMode.fromString(prefs.get("completionMode", CompletionMode.WORD_BASED.name()));
+	}
+	public static void saveCompletionMode(CompletionMode mode) {
+		prefs.put("completionMode", (mode == null ? CompletionMode.WORD_BASED : mode).name());
+	}
 }

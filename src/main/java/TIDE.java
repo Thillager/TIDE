@@ -69,72 +69,14 @@ public class TIDE {
 		String savedTheme = config.TIDEPreferences.getTheme();
 		config.Theme currentTheme = config.Theme.byName(savedTheme);
 
-		// ── 2. FlatLaf UI-Tweaks ───────────────────────────────────────────
-		// ── 2. FlatLaf UI-Tweaks & Globales Theme-Skinning ───────────────────────
-
-		// --- Eckenabrundungen (wie gehabt) ---
-		UIManager.put("Component.arc",           8);
-		UIManager.put("Button.arc",              8);
-		UIManager.put("TextComponent.arc",       8);
-		UIManager.put("ScrollBar.thumbArc",      8);
-
-		// --- Titelleiste ---
-		/* JFrame.setDefaultLookAndFeelDecorated(true);
-		UIManager.put("TitlePane.background", new Color(60, 63, 65));
-		UIManager.put("TitlePane.inactiveBackground", new Color(75, 78, 80));
-		UIManager.put("TitlePane.foreground", Color.WHITE);
-		*/
-
-		// --- Registerkarten (Tabs) ---
-		UIManager.put("TabbedPane.selectedBackground", currentTheme.backgroundLight);
-		UIManager.put("TabbedPane.background",         currentTheme.background);
-		UIManager.put("TabbedPane.foreground",         currentTheme.foreground);
-		UIManager.put("TabbedPane.showTabSeparators",  true);
-
-		// --- Dropdowns & Menüs (Das lästige Blau entfernen) ---
-		UIManager.put("ComboBox.selectionBackground",   currentTheme.backgroundHover);
-		UIManager.put("ComboBox.selectionForeground",   currentTheme.foreground);
-		UIManager.put("ComboBox.background",            currentTheme.backgroundLight);
-		UIManager.put("ComboBox.foreground",            currentTheme.foreground);
-
-		UIManager.put("MenuItem.selectionBackground",   currentTheme.backgroundHover);
-		UIManager.put("MenuItem.selectionForeground",   currentTheme.foreground);
-		UIManager.put("MenuItem.background",            currentTheme.backgroundLight);
-		UIManager.put("MenuItem.foreground",            currentTheme.foreground);
-		UIManager.put("PopupMenu.background",           currentTheme.backgroundLight);
-
-		// --- Dateibaum (Links) & Listen ---
-		UIManager.put("Tree.selectionBackground",       currentTheme.backgroundHover);
-		UIManager.put("Tree.selectionForeground",       currentTheme.foreground);
-		UIManager.put("Tree.background",                currentTheme.background);
-		UIManager.put("Tree.foreground",                currentTheme.foreground);
-
-		UIManager.put("List.selectionBackground",       currentTheme.backgroundHover);
-		UIManager.put("List.selectionForeground",       currentTheme.foreground);
-
-		// --- Buttons allgemein ---
-		UIManager.put("Button.background",             currentTheme.backgroundLight);
-		UIManager.put("Button.foreground",             currentTheme.foreground);
-		UIManager.put("Button.hoverBackground",        currentTheme.backgroundHover);
-		UIManager.put("Button.focusedBackground",      currentTheme.backgroundLight);
-
-		UIManager.put("MenuBar.hoverBackground",           currentTheme.backgroundHover);
-		UIManager.put("MenuBar.selectionBackground",       currentTheme.backgroundHover);
-		UIManager.put("MenuBar.selectionForeground",       currentTheme.foreground);
-
-		// --- Fokus-Rahmen & Trennlinien (Sehr wichtig für den Look) ---
-		UIManager.put("Component.focusColor",           currentTheme.accent);
-		UIManager.put("Separator.foreground",           currentTheme.border);
-
-		// --- Scrollbalken (ScrollBars) ---
-		UIManager.put("ScrollBar.thumbColor",           currentTheme.backgroundHover);
-		UIManager.put("ScrollBar.track",                currentTheme.background);
-
-		UIManager.put("Button.default.background",         currentTheme.backgroundLight);
-		UIManager.put("Button.default.foreground",         currentTheme.foreground);
-		UIManager.put("Button.default.hoverBackground",    currentTheme.backgroundHover);
-		UIManager.put("Button.default.focusedBackground",  currentTheme.backgroundLight);
-		UIManager.put("Button.default.focusColor",         currentTheme.accent);
+		// ── 2. FlatLaf-Theme ─────────────────────────────────────────────────
+		// Das eigentliche Theme (korrekte FlatLaf-LnF-Klasse bzw. für Fire/
+		// eigene Themes die zugehörige .properties-Ressource, siehe
+		// MainWindow.applyFlatLafTheme) wird beim Erzeugen von MainWindow
+		// gesetzt. Hier werden bewusst keine einzelnen UIManager-Farbwerte
+		// mehr manuell vorab überschrieben - das lief vorher ohnehin ins
+		// Leere, da UIManager.setLookAndFeel(...) die komplette UIDefaults-
+		// Tabelle ersetzt und solche Vorab-Overrides dabei verwirft.
 
 		// ── 3. GUI START ───────────────────────────────────────────────────
 		SwingUtilities.invokeLater(() -> new MainWindow().setVisible(true));

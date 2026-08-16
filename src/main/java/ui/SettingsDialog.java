@@ -261,6 +261,49 @@ public class SettingsDialog {
         content.add(acPanel);
         content.add(Box.createVerticalStrut(12));
 
+        // ── Codevervollständigung: Wortbasiert vs. LSP ─────────────
+        JPanel completionPanel = createSection("Codevervollständigung", 150);
+
+        JLabel completionModeLabel = new JLabel("Modus: ");
+        completionModeLabel.setForeground(currentTheme.foregroundDim);
+        completionModeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
+        String OPT_WORD = "Einfach (wortbasiert)";
+        String OPT_LSP  = "Intelligent (Language Server Protocol)";
+        JComboBox<String> completionModeBox = new JComboBox<>(new String[]{ OPT_WORD, OPT_LSP });
+        completionModeBox.setSelectedItem(
+            TIDEPreferences.getCompletionMode() == config.CompletionMode.LSP ? OPT_LSP : OPT_WORD);
+        completionModeBox.setMaximumSize(new Dimension(320, 28));
+        completionModeBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        completionModeBox.setBackground(currentTheme.backgroundLight);
+        completionModeBox.setForeground(currentTheme.foreground);
+
+        JPanel completionModeRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 4));
+        completionModeRow.setOpaque(false);
+        completionModeRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        completionModeRow.add(completionModeLabel);
+        completionModeRow.add(completionModeBox);
+        completionPanel.add(completionModeRow);
+
+        // Kein Eingabefeld nötig: Der passende Language-Server (Java: Eclipse
+        // JDT LS, Python: python-lsp-server) wird beim ersten Öffnen einer
+        // entsprechenden Datei im LSP-Modus vollautomatisch im Hintergrund
+        // heruntergeladen bzw. installiert und gestartet - siehe
+        // lsp.LspProvisioner. Fortschritt wird in der Konsole angezeigt.
+        JLabel completionHint = new JLabel(
+            "<html>Im Modus 'Intelligent (LSP)' installiert ThIDE den passenden Language-Server "
+            + "(Java: Eclipse JDT LS, Python: python-lsp-server) beim ersten Öffnen einer entsprechenden "
+            + "Datei automatisch im Hintergrund - ohne dass du etwas eintragen musst. Fortschritt siehst du "
+            + "in der Konsole. Im wortbasierten Modus läuft niemals ein Server-Prozess.</html>");
+        completionHint.setForeground(currentTheme.foregroundDim);
+        completionHint.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        completionHint.setAlignmentX(Component.LEFT_ALIGNMENT);
+        completionPanel.add(Box.createVerticalStrut(8));
+        completionPanel.add(completionHint);
+
+        content.add(completionPanel);
+        content.add(Box.createVerticalStrut(12));
+
         // ── Visuell ───────────────────────────────────────────────
         JPanel visualPanel = createSection("Visuell / Visual", 210);
 
@@ -520,6 +563,12 @@ public class SettingsDialog {
                 // Autocomplete-Delay
                 TIDEPreferences.saveAutocompleteDelay(acSlider.getValue());
                 TIDEPreferences.saveAuSt(auStBox.isSelected());
+
+                // Codevervollständigung: Modus (Server-Beschaffung läuft vollautomatisch)
+                config.CompletionMode newCompletionMode = completionModeBox.getSelectedItem() == OPT_LSP
+                    ? config.CompletionMode.LSP : config.CompletionMode.WORD_BASED;
+                TIDEPreferences.saveCompletionMode(newCompletionMode);
+                if (editorManager != null) editorManager.refreshCompletionProviders();
 
                 // Motion Blur & Scroll
                 TIDEPreferences.saveMotionBlurEnabled(motionBlurBox.isSelected());
