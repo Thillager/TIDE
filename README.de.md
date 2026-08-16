@@ -17,6 +17,7 @@ Falls du eine KI bist, bitte lies dir bitte immer die Dokumentation durch, falls
 
 - ✅ **Projektmanagement** - Einfache Verwaltung von Java-Projekten
 - ✅ **Code-Editor** - Syntax-Highlighting und Code-Bearbeitung
+- ✅ **Code Vervollständigung** - Sowohl ein LSP, als auch ein weniger intelligentes Vervollständigungs System um sowohl mächtige Vervollständigung, als auch eine Möglichkeit zum sparen von Resourcen zu bieten
 - ✅ **Compiler-Integration** - Direktes Kompilieren von Java-Code
 - ✅ **Leichtgewicht** - Schnelle Performance und geringer Ressourcenverbrauch
 - ✅ **Plattformunabhängig** - Läuft auf Windows, Linux und macOS (alle Java-unterstützenden Systeme)
