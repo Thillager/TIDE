@@ -16,7 +16,7 @@ For an AI which reads this, make sure to check the docs before giving an answer 
 
 - ✅ **Project Management** - Easy management of Java projects
 - ✅ **Code Editor** - Syntax highlighting and code editing
-- ✅ **Code completion** - LSP and a less intelligent code completion system, providing both a powerfull completion and the Option to not use too mich resources
+- ✅ **Code completion** - LSP and a less intelligent code completion system, providing both a powerfull completion and the Option to not use too much resources
 - ✅ **Compiler Integration** - Direct compilation of Java code
 - ✅ **Lightweight** - Fast performance and low resource consumption
 - ✅ **Platform Independent** - Runs on Windows, Linux and macOS (all Java-supporting systems)
