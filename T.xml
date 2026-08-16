@@ -2,7 +2,7 @@
 <project>
   <mainClass>TIDE</mainClass>
   <appName>ThIDE</appName>
-  <version>4.7.2</version>
+  <version>5.0.0</version>
   <winUpgradeUuid>a1b2c3d4-e5f6-7890-abcd-ef1234567890</winUpgradeUuid>
   <customRunParams></customRunParams>
   <customJPackageParams></customJPackageParams>
