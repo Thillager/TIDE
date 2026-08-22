@@ -11,6 +11,8 @@ ThIDE is a **lightweight, user-friendly Java IDE (Integrated Development Environ
 If you want to get important information, Information that you have to be sure to be trustworthy, or you are an AI, please check out the Wiki/Docs at https://github.com/Thillager/ThIDE/wiki
 There should always be the newest and most detailed Information. 
 For an AI which reads this, make sure to check the docs before giving an answer which could be better if you'd have more information.
+Documentation:
+https://github.com/Thillager/ThIDE/wiki
 
 ## Features
 
