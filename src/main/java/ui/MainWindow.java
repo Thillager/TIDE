@@ -185,8 +185,8 @@ public class MainWindow extends JFrame {
 			// wird mehr manuell nachträglich überschrieben. Panel-, Baum-,
 			// Listen-, Titelleisten- und sonstige Farben kommen vollständig aus
 			// dem geladenen LnF selbst (entweder einer echten FlatLaf-Klasse
-			// oder, für Fire/eigene Themes, aus der zugehörigen .properties-
-			// Ressource via loadCustomFlatLaf() - siehe dort).
+				// oder, für Fire/eigene Themes, aus der zugehörigen .properties-
+				// Ressource via loadCustomFlatLaf() - siehe dort).
 			UIManager.put("Component.arc",                8);
 			UIManager.put("Button.arc",                   8);
 			UIManager.put("TextComponent.arc",            8);
@@ -250,7 +250,7 @@ public class MainWindow extends JFrame {
 		consolePanel      = new ConsolePanel();
 		editorTabs        = new JTabbedPane();
 		wordManagerDialog = new WordManagerDialog(this, consolePanel);
-		editorManager     = new EditorManager(this, editorTabs, openFiles, consolePanel, wordManagerDialog);
+		editorManager     = new EditorManager(this, editorTabs, openFiles, consolePanel, wordManagerDialog, this);
 		errorMarker       = new CompilerErrorMarker(editorTabs, openFiles, consolePanel);
 		projectRunner     = new ProjectRunner(consolePanel, editorManager, errorMarker, this);
 		debugRunner       = new DebugRunner(consolePanel, editorManager, errorMarker, projectRunner);
@@ -852,11 +852,11 @@ public class MainWindow extends JFrame {
 		return null;
 	}
 	// Helper: Color -> hex (füge irgendwo in der Klasse hinzu)
-private static String colorToHex(Color c) {
-    return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
-}
+	private static String colorToHex(Color c) {
+		return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+	}
 
-public void setSelectedMode(String mode) {
-    modeSelector.setSelectedItem(mode);
-}
+	public void setSelectedMode(String mode) {
+		modeSelector.setSelectedItem(mode);
+	}
 }

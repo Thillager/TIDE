@@ -112,25 +112,27 @@ public class ProjectRunner {
 			return;
 		}
 
-		if (activeFile != null) {
+		/* if (activeFile != null) {
 			// Prüfen, welche-Datei es sich handelt
 			if (activeFile.getName().endsWith(".py")) {
 				mode = MODE_PYTHON;
-				mainWindow.setSelectedMode(MainWindow.MODE_PYTHON);
+				//lecacy code
+				// mainWindow.setSelectedMode(MainWindow.MODE_PYTHON); 
 			} else if (activeFile.getName().endsWith(".java")) {
 				mode = MODE_JAVA;
-				mainWindow.setSelectedMode(MainWindow.MODE_JAVA);
+				// mainWindow.setSelectedMode(MainWindow.MODE_JAVA);
 			} else if (activeFile.getName().endsWith(".c")) {
 				mode = MODE_C;
-				mainWindow.setSelectedMode(MainWindow.MODE_C);
+				// mainWindow.setSelectedMode(MainWindow.MODE_C);
 			} else if (activeFile.getName().endsWith(".cpp")) {
 				mode = MODE_CPP;
-				mainWindow.setSelectedMode(MainWindow.MODE_CPP);
+				// mainWindow.setSelectedMode(MainWindow.MODE_CPP);
 			} else if (activeFile.getName().endsWith(".bat")) {
 				mode = MODE_BATCH;
-				mainWindow.setSelectedMode(MainWindow.MODE_BATCH);
+				// mainWindow.setSelectedMode(MainWindow.MODE_BATCH);
 				}
 			}
+			*/
 
 			String mc = mainClass;
 			if (mc.endsWith(".java")) mc = mc.substring(0, mc.length() - 5);
