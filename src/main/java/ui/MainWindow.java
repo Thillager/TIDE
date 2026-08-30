@@ -45,11 +45,12 @@ import java.awt.event.InputEvent;
 @SuppressWarnings({"serial", "this-escape"})
 public class MainWindow extends JFrame {
 
-	private static final String MODE_JAVA   = ProjectRunner.MODE_JAVA;
-	private static final String MODE_PYTHON = ProjectRunner.MODE_PYTHON;
-	private static final String MODE_C      = ProjectRunner.MODE_C;
-	private static final String MODE_CPP    = ProjectRunner.MODE_CPP;
-	private static final String MODE_BATCH  = ProjectRunner.MODE_BATCH;
+	public static final String MODE_JAVA   = ProjectRunner.MODE_JAVA;
+	public static final String MODE_PYTHON = ProjectRunner.MODE_PYTHON;
+	public static final String MODE_C      = ProjectRunner.MODE_C;
+	public static final String MODE_CPP    = ProjectRunner.MODE_CPP;
+	public static final String MODE_BATCH  = ProjectRunner.MODE_BATCH;
+	public static final String Mode_CS     = ProjectRunner.MODE_CS;
 
 	private static final String RUN_MODE_STANDARD = "Standard";
 	private static final String RUN_MODE_DEBUG     = "Debug";
@@ -251,7 +252,7 @@ public class MainWindow extends JFrame {
 		wordManagerDialog = new WordManagerDialog(this, consolePanel);
 		editorManager     = new EditorManager(this, editorTabs, openFiles, consolePanel, wordManagerDialog);
 		errorMarker       = new CompilerErrorMarker(editorTabs, openFiles, consolePanel);
-		projectRunner     = new ProjectRunner(consolePanel, editorManager, errorMarker);
+		projectRunner     = new ProjectRunner(consolePanel, editorManager, errorMarker, this);
 		debugRunner       = new DebugRunner(consolePanel, editorManager, errorMarker, projectRunner);
 		gitManager        = new GitManager(this, consolePanel);
 		updateManager     = new UpdateManager(this, consolePanel, TIDEProperties.APP_VERSION, TIDEProperties.GITHUB_REPO);
@@ -853,5 +854,9 @@ public class MainWindow extends JFrame {
 	// Helper: Color -> hex (füge irgendwo in der Klasse hinzu)
 private static String colorToHex(Color c) {
     return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+}
+
+public void setSelectedMode(String mode) {
+    modeSelector.setSelectedItem(mode);
 }
 }
