@@ -185,7 +185,7 @@ public class ProjectRunner {
 						String normalizedPath = f.getAbsolutePath().replace('\\', '/');
 
 						// Absolute Sperre für ALLE Pfade, die "test" enthalten
-						if (normalizedPath.contains("/src/test/") || normalizedPath.contains("/test/") || normalizedPath.endsWith("/test.java")) {
+						if (normalizedPath.contains("/src/test/") || normalizedPath.endsWith("/test.java")) {
 							continue;
 						}
 
@@ -450,7 +450,7 @@ public class ProjectRunner {
 					// .git, out, libs und target komplett ignorieren
 					if (name.equals(".git") || name.equals("out") || name.equals("libs") || name.equals("target")) continue;
 
-					// HIER: Ignoriere den Ordner, wenn er "test" heißt oder im Test-Pfad liegt
+					// Ignoriere den Ordner, wenn er "test" heißt oder im Test-Pfad liegt
 					String absolutePath = f.getAbsolutePath().replace('\\', '/');
 					if (name.equals("test") || absolutePath.contains("/src/test")) {
 						continue;
