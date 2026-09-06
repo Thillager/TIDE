@@ -250,7 +250,7 @@ public class MainWindow extends JFrame {
 
 	private void initSubsystems() {
 		consolePanel      = new ConsolePanel();
-		editorTabs = new JTabbedPane() {
+		editorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT) {
 			@Override
 			public void updateUI() {
 				super.updateUI();

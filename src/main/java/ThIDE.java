@@ -34,7 +34,7 @@ public class ThIDE {
 		boolean enableAccel;
 		switch (hwMode) {
 			case "on"  -> {
-				enableAccel = true;
+				 enableAccel = true;
 			}
 			case "off" -> {
 				enableAccel = false;
@@ -42,8 +42,6 @@ public class ThIDE {
 			default    -> {
 				// auto: JAR-Start = kein HW-Accel, jpackage-Start = HW-Accel an
 				enableAccel = !envCheck.isRunningAsJar();
-				System.out.println("[TIDE] Hardwarebeschleunigung: AUTO → "
-					+ (enableAccel ? "AN (jpackage erkannt)" : "AUS (JAR-Start erkannt)"));
 			}
 		}
 
