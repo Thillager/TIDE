@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -70,11 +71,11 @@ public final class TarExtractor {
             }
 
             if (typeflag == '5') { // Verzeichnis
-                new File(destDir, name).mkdirs();
+                resolveSafely(destDir, name).mkdirs();
                 skipExact(in, size);
                 skipPadding(in, size);
             } else if (typeflag == '0' || typeflag == '\0') { // reguläre Datei
-                File outFile = new File(destDir, name);
+                File outFile = resolveSafely(destDir, name);
                 File parent = outFile.getParentFile();
                 if (parent != null) parent.mkdirs();
                 try (OutputStream out = new FileOutputStream(outFile)) {
@@ -91,6 +92,25 @@ public final class TarExtractor {
                 skipPadding(in, size);
             }
         }
+    }
+
+    /**
+     * Baut den Zielpfad für einen Archiv-Eintrag und stellt sicher, dass er
+     * innerhalb von {@code destDir} bleibt (Schutz vor "Zip Slip" /
+     * Path-Traversal, z. B. durch Einträge wie "../../etwas" oder
+     * absolute Pfade im Archiv).
+     *
+     * @throws IOException falls der Eintrag versucht, destDir zu verlassen
+     */
+    private static File resolveSafely(File destDir, String name) throws IOException {
+        Path destPath = destDir.toPath().normalize().toAbsolutePath();
+        Path targetPath = destPath.resolve(name).normalize().toAbsolutePath();
+
+        if (!targetPath.startsWith(destPath)) {
+            throw new IOException(
+                "Unsicherer Archiv-Eintrag außerhalb des Zielverzeichnisses: " + name);
+        }
+        return targetPath.toFile();
     }
 
     // ── Hilfsfunktionen ──────────────────────────────────────────────────

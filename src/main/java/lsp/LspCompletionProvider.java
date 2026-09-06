@@ -68,6 +68,17 @@ public class LspCompletionProvider extends DefaultCompletionProvider {
     protected List<Completion> getCompletionsImpl(JTextComponent comp) {
         if (closed || !client.isAlive()) return Collections.emptyList();
 
+        // Falls noch eine Änderung im Debounce-Timer wartet, JETZT sofort
+        // synchron nachholen. Sonst fragen wir den Server nach Vorschlägen
+        // für eine Cursor-Position, die er (mit seinem veralteten
+        // Dokumentstand) noch gar nicht kennt - das führt zu unsinnigen
+        // Vorschlägen (z.B. bereits getippte Wörter erneut) oder leeren
+        // Ergebnissen, wenn Strg+Leer kurz nach dem Tippen gedrückt wird.
+        if (debounceTimer.isRunning()) {
+            debounceTimer.stop();
+            pushChange();
+        }
+
         int line;
         int character;
         try {

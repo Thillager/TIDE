@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -138,10 +139,15 @@ public class LspClient {
         params.put("capabilities", new LinkedHashMap<>());
         params.put("rootUri", rootDir != null ? rootDir.toURI().toString() : null);
         try {
-            sendRequest("initialize", params).get(6, TimeUnit.SECONDS);
+            // JDT LS ist eine vollständige OSGi-Anwendung und kann beim
+            // (Kalt-)Start realistisch 10-30+ Sekunden brauchen - 6s war zu knapp.
+            sendRequest("initialize", params).get(45, TimeUnit.SECONDS);
             sendNotification("initialized", new LinkedHashMap<>());
+        } catch (TimeoutException ex) {
+            log("Initialisierung fehlgeschlagen: Der Language-Server hat innerhalb von 45s nicht geantwortet (Kaltstart kann bei JDT LS länger dauern).", Color.RED);
         } catch (Exception ex) {
-            log("Initialisierung fehlgeschlagen: " + ex.getMessage(), Color.RED);
+            String msg = ex.getMessage();
+            log("Initialisierung fehlgeschlagen: " + (msg != null ? msg : ex.getClass().getSimpleName()), Color.RED);
         }
     }
 

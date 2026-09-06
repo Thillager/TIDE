@@ -512,7 +512,18 @@ public class EditorManager {
 
 		AutoCompletion ac = new AutoCompletion(provider);
 		ac.setAutoCompleteSingleChoices(false);
-		ac.setAutoActivationEnabled(true);
+		// Bei LSP-Vervollständigung fragt getCompletionsImpl() synchron und
+		// BLOCKIEREND (bis zu COMPLETION_TIMEOUT_MS) beim Language-Server-
+		// Prozess an - und zwar direkt auf dem EDT. Mit aktivierter
+		// Auto-Aktivierung würde das bei JEDEM Tastendruck (nach kurzer
+		// Pause) ausgelöst und die komplette Oberfläche kurz einfrieren;
+		// währenddessen aufgestaute Tastendrücke führten zu Anfragen mit
+		// veraltetem Cursor-Stand und damit zu unsinnigen Vorschlägen
+		// (z.B. bereits fertig getippte Wörter erneut). Daher bei LSP nur
+		// auf explizites Strg+Leer reagieren - dort ist eine kurze
+		// Wartezeit erwartbar und unproblematisch.
+		boolean isLspBacked = provider instanceof LspCompletionProvider;
+		ac.setAutoActivationEnabled(!isLspBacked);
 		ac.setAutoActivationDelay(TIDEPreferences.getAutocompleteDelay());
 		ac.install(textArea);
 		autoCompletions.put(sp, ac);
