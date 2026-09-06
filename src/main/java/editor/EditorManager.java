@@ -55,32 +55,32 @@ public class EditorManager {
 	private final Map<Component, JButton> manageWordsButtons          = new HashMap<>();
 
 	public EditorManager(JFrame parent, JTabbedPane editorTabs, Map<Component, File> openFiles,
-        ConsolePanel consolePanel, WordManagerDialog wordManagerDialog, MainWindow mainWindow) {
-    this.parent            = parent;
-    this.editorTabs        = editorTabs;
-    this.openFiles         = openFiles;
-    this.consolePanel      = consolePanel;
-    this.wordManagerDialog = wordManagerDialog;
-    this.mainWindow        = mainWindow;
+		ConsolePanel consolePanel, WordManagerDialog wordManagerDialog, MainWindow mainWindow) {
+		this.parent            = parent;
+		this.editorTabs        = editorTabs;
+		this.openFiles         = openFiles;
+		this.consolePanel      = consolePanel;
+		this.wordManagerDialog = wordManagerDialog;
+		this.mainWindow        = mainWindow;
 
-    // Beim Wechseln zwischen bereits geöffneten Tabs
-    // den passenden Sprachmodus in MainWindow aktivieren.
-    this.editorTabs.addChangeListener(e -> {
-        Component selectedTab = this.editorTabs.getSelectedComponent();
-        if (selectedTab == null) return;
+		// Beim Wechseln zwischen bereits geöffneten Tabs
+		// den passenden Sprachmodus in MainWindow aktivieren.
+		this.editorTabs.addChangeListener(e -> {
+				Component selectedTab = this.editorTabs.getSelectedComponent();
+				if (selectedTab == null) return;
 
-        File file = this.openFiles.get(selectedTab);
-        if (file != null) {
-            onFileOpened(file);
+				File file = this.openFiles.get(selectedTab);
+				if (file != null) {
+					onFileOpened(file);
 
-            // Outline ebenfalls auf den neu ausgewählten Editor setzen
-            if (outlinePanel != null && selectedTab instanceof RTextScrollPane sp) {
-                RSyntaxTextArea textArea = (RSyntaxTextArea) sp.getTextArea();
-                outlinePanel.refresh(textArea, file.getName());
-            }
-        }
-    });
-}
+					// Outline ebenfalls auf den neu ausgewählten Editor setzen
+					if (outlinePanel != null && selectedTab instanceof RTextScrollPane sp) {
+						RSyntaxTextArea textArea = (RSyntaxTextArea) sp.getTextArea();
+						outlinePanel.refresh(textArea, file.getName());
+					}
+				}
+			});
+	}
 
 	public void applyFontSizeToAllEditors(int size) {
 		for (int i = 0; i < editorTabs.getTabCount(); i++) {
@@ -401,29 +401,57 @@ public class EditorManager {
 				textArea.getFontMetrics(textArea.getFont()).getHeight());
 			sp.setBorder(null);
 
-			JPanel tabHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+			JPanel tabHeader = new JPanel(new BorderLayout(5, 0));
 			tabHeader.setOpaque(false);
-			tabHeader.add(new JLabel(file.getName()));
+			tabHeader.setPreferredSize(new Dimension(160, 18));
+
+			JLabel tabTitle = new JLabel(file.getName());
+			tabTitle.setToolTipText(file.getName());
+
+			JButton manageWordsBtn = new JButton("Wörter");
+			manageWordsBtn.setFont(manageWordsBtn.getFont().deriveFont(10f));
+			manageWordsBtn.setForeground(new Color(180, 180, 255));
+			manageWordsBtn.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 5));
+			manageWordsBtn.setContentAreaFilled(false);
+			manageWordsBtn.setFocusPainted(false);
+			manageWordsBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+			manageWordsBtn.setToolTipText("Gelernte Wörter verwalten / löschen");
 
 			JButton closeBtn = new JButton("×");
 			closeBtn.setBorder(null);
 			closeBtn.setContentAreaFilled(false);
+			closeBtn.setFocusPainted(false);
+			closeBtn.setMargin(new Insets(0, 4, 0, 4));
 			closeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+			// Rechte Seite des Tabs
+			JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+			rightPanel.setOpaque(false);
+			rightPanel.add(manageWordsBtn);
+			rightPanel.add(closeBtn);
+
+			// Tab-Inhalt
+			tabHeader.add(tabTitle, BorderLayout.CENTER);
+			tabHeader.add(rightPanel, BorderLayout.EAST);
+
 			closeBtn.addActionListener(e -> {
 					if (timerRef != null) timerRef.stop();
+
 					AutoCompletion ac = autoCompletions.remove(sp);
 					if (ac != null) ac.uninstall();
+
 					LspCompletionProvider lp = lspProviders.remove(sp);
-					if (lp != null) lp.close(); // beendet nur die Bindung dieses Tabs (didClose), nicht den Server-Prozess
+					if (lp != null) lp.close();
+
 					manageWordsButtons.remove(sp);
 					openFiles.remove(sp);
 					editorTabs.remove(sp);
 				});
-			tabHeader.add(closeBtn);
 
 			editorTabs.addTab(file.getName(), sp);
 			editorTabs.setTabComponentAt(editorTabs.getTabCount() - 1, tabHeader);
 			editorTabs.setSelectedComponent(sp);
+
 			openFiles.put(sp, file);
 			onFileOpened(file);
 			textArea.requestFocusInWindow();
@@ -432,15 +460,9 @@ public class EditorManager {
 				outlinePanel.refresh(textArea, file.getName());
 			}
 
-			JButton manageWordsBtn = new JButton("Wörter");
-			manageWordsBtn.setFont(manageWordsBtn.getFont().deriveFont(10f));
-			manageWordsBtn.setForeground(new Color(180, 180, 255));
-			manageWordsBtn.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 5));
-			manageWordsBtn.setContentAreaFilled(false);
-			manageWordsBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-			manageWordsBtn.setToolTipText("Gelernte Wörter verwalten / löschen");
-			tabHeader.add(manageWordsBtn);
 			manageWordsButtons.put(sp, manageWordsBtn);
+
+			installCompletion(sp, textArea, file, manageWordsBtn);
 
 			installCompletion(sp, textArea, file, manageWordsBtn);
 
@@ -516,7 +538,7 @@ public class EditorManager {
 		// BLOCKIEREND (bis zu COMPLETION_TIMEOUT_MS) beim Language-Server-
 		// Prozess an - und zwar direkt auf dem EDT. Mit aktivierter
 		// Auto-Aktivierung würde das bei JEDEM Tastendruck (nach kurzer
-		// Pause) ausgelöst und die komplette Oberfläche kurz einfrieren;
+			// Pause) ausgelöst und die komplette Oberfläche kurz einfrieren;
 		// währenddessen aufgestaute Tastendrücke führten zu Anfragen mit
 		// veraltetem Cursor-Stand und damit zu unsinnigen Vorschlägen
 		// (z.B. bereits fertig getippte Wörter erneut). Daher bei LSP nur
@@ -654,7 +676,7 @@ public class EditorManager {
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					}
+				}
 			}
 		}
 	}
@@ -717,7 +739,7 @@ public class EditorManager {
 			savedCol  = caretOffset - ta.getLineStartOffset(savedLine);
 		} catch (Exception e) {
 			e.printStackTrace();
-			}
+		}
 
 		// ── Sprache ermitteln ──────────────────────────────────────────────
 		File activeFile = getActiveFile();
@@ -897,21 +919,21 @@ private DefaultCompletionProvider createCompletionProvider(RSyntaxTextArea textA
 }
 
 private void onFileOpened(File file) {
-    if (file == null) return;
+	if (file == null) return;
 
-    String fileName = file.getName().toLowerCase(Locale.ROOT);
+	String fileName = file.getName().toLowerCase(Locale.ROOT);
 
-    if (fileName.endsWith(".py")) {
-        mainWindow.setSelectedMode(MainWindow.MODE_PYTHON);
-    } else if (fileName.endsWith(".java")) {
-        mainWindow.setSelectedMode(MainWindow.MODE_JAVA);
-    } else if (fileName.endsWith(".c")) {
-        mainWindow.setSelectedMode(MainWindow.MODE_C);
-    } else if (fileName.endsWith(".cpp")) {
-        mainWindow.setSelectedMode(MainWindow.MODE_CPP);
-    } else if (fileName.endsWith(".bat") || fileName.endsWith(".cmd")) {
-        mainWindow.setSelectedMode(MainWindow.MODE_BATCH);
-    }
+	if (fileName.endsWith(".py")) {
+		mainWindow.setSelectedMode(MainWindow.MODE_PYTHON);
+	} else if (fileName.endsWith(".java")) {
+		mainWindow.setSelectedMode(MainWindow.MODE_JAVA);
+	} else if (fileName.endsWith(".c")) {
+		mainWindow.setSelectedMode(MainWindow.MODE_C);
+	} else if (fileName.endsWith(".cpp")) {
+		mainWindow.setSelectedMode(MainWindow.MODE_CPP);
+	} else if (fileName.endsWith(".bat") || fileName.endsWith(".cmd")) {
+		mainWindow.setSelectedMode(MainWindow.MODE_BATCH);
+	}
 }
 
 }

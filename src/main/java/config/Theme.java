@@ -3,7 +3,7 @@ package config;
 import java.awt.Color;
 
 /**
-* Zentrales Theme-Objekt für TIDE.
+* Zentrales Theme-Objekt für ThIDE.
 *
 * flatLafClass  →  welcher FlatLaf-LookAndFeel wird geladen
 * "dark" | "light" | "mac-dark" | "mac-light"

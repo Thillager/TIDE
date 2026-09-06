@@ -250,7 +250,16 @@ public class MainWindow extends JFrame {
 
 	private void initSubsystems() {
 		consolePanel      = new ConsolePanel();
-		editorTabs        = new JTabbedPane();
+		editorTabs = new JTabbedPane() {
+			@Override
+			public void updateUI() {
+				super.updateUI();
+
+				if (getUI() instanceof javax.swing.plaf.basic.BasicTabbedPaneUI ui) {
+				}
+			}
+		};
+		editorTabs.putClientProperty("JTabbedPane.tabHeight", 16);
 		wordManagerDialog = new WordManagerDialog(this, consolePanel);
 		editorManager     = new EditorManager(this, editorTabs, openFiles, consolePanel, wordManagerDialog, this);
 		errorMarker       = new CompilerErrorMarker(editorTabs, openFiles, consolePanel);
