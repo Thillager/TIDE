@@ -8,7 +8,7 @@ class TIDEPropertiesTest {
 
     @Test
     void projectIdentityIsConfigured() {
-        assertEquals("5.1.0", TIDEProperties.APP_VERSION);
+        assertEquals("5.2.0", TIDEProperties.APP_VERSION);
         assertEquals("Thillager/TIDE", TIDEProperties.GITHUB_REPO);
     }
 
