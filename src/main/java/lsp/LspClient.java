@@ -353,7 +353,8 @@ public class LspClient {
                 // TIDE-Konsole gespiegelt, um sie nicht mit LSP-internem
                 // Rauschen zuzumüllen.
             }
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+        	e.printStackTrace();
         }
     }
 

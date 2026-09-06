@@ -348,7 +348,9 @@ public class OutlinePanel extends JPanel {
                 Rectangle rect = currentEditor.modelToView2D(
                         currentEditor.getLineStartOffset(line)).getBounds();
                 currentEditor.scrollRectToVisible(rect);
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+            	e.printStackTrace();
+            	}
         }
     }
 

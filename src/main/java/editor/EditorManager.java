@@ -652,7 +652,9 @@ public class EditorManager {
 							provider.addCompletion(new BasicCompletion(provider, word));
 						}
 					}
-				} catch (Exception ignored) {}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					}
 			}
 		}
 	}
@@ -713,7 +715,9 @@ public class EditorManager {
 			int caretOffset = ta.getCaretPosition();
 			savedLine = ta.getLineOfOffset(caretOffset);
 			savedCol  = caretOffset - ta.getLineStartOffset(savedLine);
-		} catch (Exception ignored) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+			}
 
 		// ── Sprache ermitteln ──────────────────────────────────────────────
 		File activeFile = getActiveFile();

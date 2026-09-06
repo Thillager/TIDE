@@ -40,6 +40,8 @@ import javax.swing.border.*;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
+import javax.xml.XMLConstants;
 import java.awt.event.InputEvent;
 
 @SuppressWarnings({"serial", "this-escape"})
@@ -828,6 +830,21 @@ public class MainWindow extends JFrame {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
 			dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+			dbf.setFeature(
+				"http://apache.org/xml/features/disallow-doctype-decl",
+				true
+			);
+			dbf.setXIncludeAware(false);
+			dbf.setExpandEntityReferences(false);
+			dbf.setAttribute(
+				XMLConstants.ACCESS_EXTERNAL_DTD,
+				""
+			);
+
+			dbf.setAttribute(
+				XMLConstants.ACCESS_EXTERNAL_SCHEMA,
+				""
+			);
 			Document doc = dbf.newDocumentBuilder().parse(txml);
 			String mainClass = getXmlTag(doc, "mainClass");
 			String appName   = getXmlTag(doc, "appName");

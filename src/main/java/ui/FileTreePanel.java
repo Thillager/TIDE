@@ -50,28 +50,28 @@ public class FileTreePanel extends JScrollPane {
 
 		// Custom cell renderer für Theme-Farben
 		fileTree.setCellRenderer(new DefaultTreeCellRenderer() {
-			{
-				setBackgroundNonSelectionColor(t.background);
-				setBackgroundSelectionColor(t.backgroundLight);
-				setTextNonSelectionColor(t.foreground);
-				setTextSelectionColor(t.foreground);
-				setBorderSelectionColor(t.border);
-			}
-		});
+				{
+					setBackgroundNonSelectionColor(t.background);
+					setBackgroundSelectionColor(t.backgroundLight);
+					setTextNonSelectionColor(t.foreground);
+					setTextSelectionColor(t.foreground);
+					setBorderSelectionColor(t.border);
+				}
+			});
 
 		fileTree.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent me) {
-				if (me.getClickCount() == 2) {
-					DefaultMutableTreeNode node =
+				@Override
+				public void mouseClicked(MouseEvent me) {
+					if (me.getClickCount() == 2) {
+						DefaultMutableTreeNode node =
 						(DefaultMutableTreeNode) fileTree.getLastSelectedPathComponent();
-					if (node != null && node.getUserObject() instanceof FileNode) {
-						File selectedFile = ((FileNode) node.getUserObject()).getFile();
-						if (selectedFile.isFile()) onFileOpen.accept(selectedFile);
+						if (node != null && node.getUserObject() instanceof FileNode) {
+							File selectedFile = ((FileNode) node.getUserObject()).getFile();
+							if (selectedFile.isFile()) onFileOpen.accept(selectedFile);
+						}
 					}
 				}
-			}
-		});
+			});
 
 		setViewportView(fileTree);
 		getViewport().setBackground(t.background);
@@ -160,8 +160,8 @@ public class FileTreePanel extends JScrollPane {
 		JMenuItem aktualisieren = new JMenuItem(LanguageManager.t("aktualisieren"));
 
 		aktualisieren.addActionListener(e -> {
-			if (currentProjectFolder != null) updateFileTree(currentProjectFolder);
-		});
+				if (currentProjectFolder != null) updateFileTree(currentProjectFolder);
+			});
 
 		if (path != null) {
 			fileTree.setSelectionPath(path);
@@ -175,9 +175,9 @@ public class FileTreePanel extends JScrollPane {
 			neuDatei.addActionListener(e   -> createNewFile(finalClickedFile, currentProjectFolder));
 			neuOrdner.addActionListener(e  -> createNewFolder(finalClickedFile, currentProjectFolder));
 			copy.addActionListener(e       -> { clipboard = finalClickedFile; isCut = false;
-				consolePanel.log("[INFO] Kopiert: " + finalClickedFile.getName() + "\n", Color.LIGHT_GRAY); });
+					consolePanel.log("[INFO] Kopiert: " + finalClickedFile.getName() + "\n", Color.LIGHT_GRAY); });
 			cut.addActionListener(e        -> { clipboard = finalClickedFile; isCut = true;
-				consolePanel.log("[INFO] Ausgeschnitten: " + finalClickedFile.getName() + "\n", Color.LIGHT_GRAY); });
+					consolePanel.log("[INFO] Ausgeschnitten: " + finalClickedFile.getName() + "\n", Color.LIGHT_GRAY); });
 			paste.addActionListener(e      -> pasteFile(finalClickedFile, currentProjectFolder));
 			delete.addActionListener(e     -> deleteFile(finalClickedFile, currentProjectFolder));
 			umbenennen.addActionListener(e -> renameFile(finalClickedFile, currentProjectFolder));
@@ -248,7 +248,7 @@ public class FileTreePanel extends JScrollPane {
 	private void pasteFile(File target, File currentProjectFolder) {
 		if (clipboard == null || currentProjectFolder == null) return;
 		File zielOrdner = (target != null && target.isDirectory()) ? target
-			: (target != null ? target.getParentFile() : currentProjectFolder);
+		: (target != null ? target.getParentFile() : currentProjectFolder);
 		File dest = new File(zielOrdner, clipboard.getName());
 
 		try {
@@ -259,9 +259,9 @@ public class FileTreePanel extends JScrollPane {
 			}
 			if (isCut) {
 				Files.walk(clipboard.toPath())
-					.sorted(java.util.Comparator.reverseOrder())
-					.map(java.nio.file.Path::toFile)
-					.forEach(File::delete);
+				.sorted(java.util.Comparator.reverseOrder())
+				.map(java.nio.file.Path::toFile)
+				.forEach(File::delete);
 				clipboard = null;
 				isCut     = false;
 			}
@@ -283,24 +283,57 @@ public class FileTreePanel extends JScrollPane {
 		}
 	}
 
-	private void deleteFile(File file, File currentProjectFolder) {
-		if (file == null) return;
-		int confirm = JOptionPane.showConfirmDialog(
-			parent, "'" + file.getName() + "' wirklich löschen?",
-			"Löschen bestätigen", JOptionPane.YES_NO_OPTION);
-		if (confirm == JOptionPane.YES_OPTION) {
-			try {
-				Files.walk(file.toPath())
-					.sorted(java.util.Comparator.reverseOrder())
-					.map(java.nio.file.Path::toFile)
-					.forEach(File::delete);
-				updateFileTree(currentProjectFolder);
-				consolePanel.log("[INFO] Gelöscht: " + file.getName() + "\n", Color.LIGHT_GRAY);
-			} catch (IOException ex) {
-				consolePanel.log("[FEHLER] Löschen fehlgeschlagen.\n", Color.RED);
-			}
-		}
-	}
+private void deleteFile(File file, File currentProjectFolder) {
+    if (file == null) return;
+
+    int confirm = JOptionPane.showConfirmDialog(
+            parent,
+            "'" + file.getName() + "' wirklich löschen?",
+            "Löschen bestätigen",
+            JOptionPane.YES_NO_OPTION
+    );
+
+    if (confirm != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    try (var paths = Files.walk(file.toPath())) {
+
+        paths.sorted(java.util.Comparator.reverseOrder())
+                .forEach(path -> {
+                    try {
+                        Files.deleteIfExists(path);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+
+        updateFileTree(currentProjectFolder);
+
+        consolePanel.log(
+                "[INFO] Gelöscht: " + file.getName() + "\n",
+                Color.LIGHT_GRAY
+        );
+
+    } catch (IOException ex) {
+        consolePanel.log(
+                "[FEHLER] Löschen fehlgeschlagen: " +
+                ex.getMessage() + "\n",
+                Color.RED
+        );
+
+    } catch (RuntimeException ex) {
+        Throwable cause = ex.getCause();
+
+        consolePanel.log(
+                "[FEHLER] Löschen fehlgeschlagen: " +
+                (cause != null ? cause.getMessage() : ex.getMessage()) +
+                "\n",
+                Color.RED
+        );
+    }
+}
+
 
 	private void renameFile(File file, File currentProjectFolder) {
 		if (file == null) return;

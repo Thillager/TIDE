@@ -57,7 +57,9 @@ public class ConsolePanel extends JPanel {
             if (doc.getLength() > TIDEProperties.CONSOLE_MAX_CHARS) {
                 try {
                     doc.remove(0, TIDEProperties.CONSOLE_TRIM_CHARS);
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+				e.printStackTrace();
+                	}
             }
             Style style = consolePane.addStyle("style", null);
             StyleConstants.setForeground(style, color);
@@ -66,7 +68,9 @@ public class ConsolePanel extends JPanel {
                 if (config.TIDEPreferences.getConsoleAutoScroll()) {
                     consolePane.setCaretPosition(doc.getLength());
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+            	e.printStackTrace();
+            	}
         });
     }
 

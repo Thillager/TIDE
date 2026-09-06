@@ -142,7 +142,9 @@ public class UpdateManager {
 
             return true;
 
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	}
         return false;
     }
 
@@ -152,7 +154,9 @@ public class UpdateManager {
             .getCodeSource().getLocation().toURI();
             File f = new File(uri);
             if (f.getName().endsWith(".jar")) return f;
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	}
         return null;
     }
 
@@ -393,7 +397,9 @@ public class UpdateManager {
             .redirectErrorStream(true).start();
             hasSudoNopass = p.waitFor(3, java.util.concurrent.TimeUnit.SECONDS)
             && p.exitValue() == 0;
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	}
 
         File shFile = new File(System.getProperty("java.io.tmpdir"), "tide_update.sh");
         try (PrintWriter pw = new PrintWriter(shFile)) {

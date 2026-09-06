@@ -65,7 +65,9 @@ public class GitManager {
 						}
 					}
 				}
-			} catch (IOException ignored) {}
+			} catch (IOException e) {
+				e.printStackTrace();
+				}
 		}
 
 		try {
@@ -79,7 +81,9 @@ public class GitManager {
 						p.getOutputStream().write("protocol=https\nhost=github.com\n\n".getBytes());
 						p.getOutputStream().flush();
 						p.getOutputStream().close();
-					} catch (Exception ignored2) {}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						}
 				}).start();
 			String out = new String(p.getInputStream().readAllBytes()).trim();
 			p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
@@ -91,7 +95,9 @@ public class GitManager {
 			if (user != null && pass != null && !user.isEmpty() && !pass.isEmpty()) {
 				return new String[]{user, pass};
 			}
-		} catch (Exception ignored) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+			}
 
 		if (System.getProperty("os.name", "").toLowerCase().contains("win")) {
 			try {
@@ -110,7 +116,9 @@ public class GitManager {
 						}
 					}
 				}
-			} catch (Exception ignored) {}
+			} catch (Exception e) {
+				e.printStackTrace();
+				}
 		}
 
 		// 4. Nur Username aus git config
@@ -122,7 +130,9 @@ public class GitManager {
 			String name = new String(p.getInputStream().readAllBytes()).trim();
 			p.waitFor(2, java.util.concurrent.TimeUnit.SECONDS);
 			if (!name.isEmpty()) return new String[]{name, null};
-		} catch (Exception ignored) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+			}
 
 		return null;
 	}
@@ -266,7 +276,9 @@ public class GitManager {
 					} else {
 						consolePanel.log("  (sauber)\n", new Color(80, 200, 120));
 					}
-				} catch (Exception ignored) {}
+				} catch (Exception e) {
+					e.printStackTrace();
+					}
 			}).start();
 	}
 }

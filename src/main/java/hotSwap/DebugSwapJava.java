@@ -138,7 +138,9 @@ public class DebugSwapJava implements DebugRunner.DebugStrategy {
 			try (ServerSocket s = new ServerSocket(port)) {
 				s.setReuseAddress(true);
 				return port;
-			} catch (IOException ignored) {}
+			} catch (IOException e) {
+				e.printStackTrace();
+				}
 		}
 		return -1;
 	}
