@@ -8,7 +8,7 @@ import config.Theme;
 import javax.swing.*;
 import java.awt.*;
 
-public class TIDE {
+public class ThIDE {
 
 	public static void main(String[] args) {
 
